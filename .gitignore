@@ -10,3 +10,15 @@ Thumbs.db
 *.tsbuildinfo
 .vscode/
 .idea/
+# Backend (.NET Framework)
+backend/packages/
+backend/**/bin/
+backend/**/obj/
+backend/.vs/
+backend/**/.vs/
+backend/**/App_Data/logs/
+*.csproj.user
+*.pubxml.user
+Web.secrets.config
+# Local Pi runtime state
+.atl/
