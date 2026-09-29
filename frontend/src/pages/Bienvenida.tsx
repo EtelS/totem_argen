@@ -3,45 +3,69 @@ import { useNavigate } from 'react-router-dom';
 import { TecladoNumerico } from '../components/TecladoNumerico';
 import { BotonAyuda } from '../components/BotonAyuda';
 import { useTotemStore } from '../store/useTotemStore';
-import { buscarAtencion } from '../mock/buscarAtencion';
+import { useAuthStore } from '../store/useAuthStore';
+import { ApiError } from '../api/client';
+import { buscarAtencion, ResultadoAtencion } from '../api/atencion';
+import { useElegirTurno } from '../hooks/useElegirTurno';
 
 /**
- * Pantalla de bienvenida (`/`). Busca al paciente por DNI en la data mock:
- * si tiene turno con mutual/obra social, confirma el turno; si es
- * particular o no se encuentra, se deriva a Recepcion con un numero de orden.
+ * Pantalla de bienvenida (`/`). Busca al paciente por DNI en el backend:
+ * con varios turnos hoy el paciente elige cual confirmar
+ * (`/seleccionar-turno`); con uno solo se resuelve directo. Sin turnos o sin
+ * paciente, se deriva a Recepcion con un numero de orden.
  */
 export function Bienvenida() {
   const [dni, setDni] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
+  const sucursal = useAuthStore((s) => s.sucursal);
   const setDniStore = useTotemStore((s) => s.setDni);
-  const setPendienteToken = useTotemStore((s) => s.setPendienteToken);
+  const setSeleccionTurno = useTotemStore((s) => s.setSeleccionTurno);
   const setConfirmacion = useTotemStore((s) => s.setConfirmacion);
   const siguienteNumero = useTotemStore((s) => s.siguienteNumero);
+  const elegirTurno = useElegirTurno();
 
-  function continuar() {
+  async function continuar() {
     if (dni.length < 7) {
       setError('Ingresa un DNI valido (7 u 8 digitos)');
+      return;
+    }
+    if (!sucursal) {
       return;
     }
 
     setError(null);
     setDniStore(dni);
+    setCargando(true);
 
-    const resultado = buscarAtencion(dni);
-
-    if (resultado.tipo === 'turno') {
-      if (resultado.paciente.token) {
-        setPendienteToken({ paciente: resultado.paciente, turno: resultado.turno });
-        navigate('/token');
-        return;
+    let resultado: ResultadoAtencion;
+    try {
+      resultado = await buscarAtencion(sucursal.suc_id, dni);
+    } catch (e) {
+      setCargando(false);
+      // A 401 already closed the session; RequireSesion sends the totem back to login.
+      if (!(e instanceof ApiError && e.status === 401)) {
+        navigate('/error');
       }
-      setConfirmacion({ tipo: 'turno', paciente: resultado.paciente, turno: resultado.turno });
-    } else {
-      setConfirmacion({ tipo: 'derivado', numero: siguienteNumero(), paciente: resultado.paciente });
+      return;
     }
 
-    navigate('/confirmacion');
+    if (resultado.tipo === 'derivado') {
+      setConfirmacion({ tipo: 'derivado', numero: siguienteNumero(), paciente: resultado.paciente });
+      navigate('/confirmacion');
+      return;
+    }
+
+    if (resultado.turnos.length === 1) {
+      // Keeps the button disabled while the single turno is confirmed in the backend.
+      await elegirTurno(resultado.paciente, resultado.turnos[0]);
+      setCargando(false);
+      return;
+    }
+
+    setSeleccionTurno({ paciente: resultado.paciente, turnos: resultado.turnos });
+    navigate('/seleccionar-turno');
   }
 
   return (
@@ -63,6 +87,7 @@ export function Bienvenida() {
       <button
         type="button"
         onClick={continuar}
+        disabled={cargando}
         className="w-full rounded-full bg-totem-success py-6 text-totem-lg font-bold text-white shadow-md disabled:opacity-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-totem-navy"
       >
         Continuar

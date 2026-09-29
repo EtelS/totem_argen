@@ -15,7 +15,7 @@ describe('Confirmacion', () => {
       confirmacion: {
         tipo: 'turno',
         paciente: { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical', token: '123' },
-        turno: { fecha: '17/09/2026', hora: '15:00', prestador: 'Romo Guillermo', pacienteDni: '30738807' },
+        turno: { codigo: 1, fecha: '17/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'swiss medical', particular: false },
       },
     });
 

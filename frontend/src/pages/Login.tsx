@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TecladoAlfanumerico } from '../components/TecladoAlfanumerico';
 import { useAuthStore } from '../store/useAuthStore';
-import { login } from '../mock/login';
+import { login } from '../api/auth';
 
 type CampoActivo = 'usuario' | 'contrasena';
 
@@ -19,16 +19,16 @@ export function Login() {
   const [cargando, setCargando] = useState(false);
 
   const navigate = useNavigate();
-  const sucursal = useAuthStore((s) => s.sucursal);
+  const sesionActiva = useAuthStore((s) => Boolean(s.token && s.sucursal));
   const setCredencialesValidadas = useAuthStore((s) => s.setCredencialesValidadas);
 
   useEffect(() => {
-    if (sucursal) {
+    if (sesionActiva) {
       navigate('/', { replace: true });
     }
-  }, [sucursal, navigate]);
+  }, [sesionActiva, navigate]);
 
-  if (sucursal) {
+  if (sesionActiva) {
     return null;
   }
 
@@ -53,11 +53,11 @@ export function Login() {
       const resultado = await login(usuario, contrasena);
 
       if (!resultado.ok) {
-        setError('Usuario o contrasena incorrectos');
+        setError(resultado.mensaje);
         return;
       }
 
-      setCredencialesValidadas(resultado.usuario, resultado.sucursales);
+      setCredencialesValidadas(resultado.usuario, resultado.token, resultado.sucursales);
 
       if (resultado.sucursales.length === 1) {
         navigate('/');
@@ -65,7 +65,8 @@ export function Login() {
         navigate('/seleccionar-sucursal');
       }
     } catch {
-      navigate('/error');
+      // /error requires a session, so connection failures are shown inline on the login screen.
+      setError('No pudimos conectar con el sistema. Intenta nuevamente.');
     } finally {
       setCargando(false);
     }

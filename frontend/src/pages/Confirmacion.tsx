@@ -38,7 +38,7 @@ export function Confirmacion() {
             <p className="mt-4 text-2xl">Prestador: {confirmacion.turno.prestador}</p>
             <p className="text-2xl">Fecha: {confirmacion.turno.fecha}</p>
             <p className="text-2xl">Hora: {confirmacion.turno.hora}</p>
-            <p className="mt-4 text-2xl capitalize">Mutual: {confirmacion.paciente.mutual}</p>
+            <p className="mt-4 text-2xl capitalize">Mutual: {confirmacion.turno.mutual}</p>
           </div>
         </>
       ) : (

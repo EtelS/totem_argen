@@ -11,5 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/tests/setup.ts'],
+    // Keep tests independent from the developer's .env.local.
+    env: { VITE_API_BASE_URL: '' },
   },
 });

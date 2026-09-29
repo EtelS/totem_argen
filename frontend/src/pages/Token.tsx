@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { TecladoNumerico } from '../components/TecladoNumerico';
 import { BotonAyuda } from '../components/BotonAyuda';
 import { useTotemStore } from '../store/useTotemStore';
+import { useConfirmarTurno } from '../hooks/useConfirmarTurno';
 
 const MAX_INTENTOS = 2;
 
@@ -17,10 +18,12 @@ export function Token() {
   const setConfirmacion = useTotemStore((s) => s.setConfirmacion);
   const siguienteNumero = useTotemStore((s) => s.siguienteNumero);
   const navigate = useNavigate();
+  const confirmar = useConfirmarTurno();
 
   const [valor, setValor] = useState('');
   const [intentos, setIntentos] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
     if (!pendienteToken) {
@@ -32,15 +35,16 @@ export function Token() {
     return null;
   }
 
-  function continuar() {
+  async function continuar() {
     if (!pendienteToken) {
       return;
     }
 
     if (valor === pendienteToken.paciente.token) {
-      setConfirmacion({ tipo: 'turno', paciente: pendienteToken.paciente, turno: pendienteToken.turno });
+      setEnviando(true);
+      // Cleared after confirming: clearing first would trigger the redirect to '/' above.
+      await confirmar(pendienteToken.paciente, pendienteToken.turno);
       setPendienteToken(null);
-      navigate('/confirmacion');
       return;
     }
 
@@ -77,6 +81,7 @@ export function Token() {
       <button
         type="button"
         onClick={continuar}
+        disabled={enviando}
         className="w-full rounded-full bg-totem-success py-6 text-totem-lg font-bold text-white shadow-md disabled:opacity-50 focus-visible:outline focus-visible:outline-4 focus-visible:outline-totem-navy"
       >
         Continuar
