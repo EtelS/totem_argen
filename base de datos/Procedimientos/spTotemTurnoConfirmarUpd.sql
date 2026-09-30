@@ -3,7 +3,7 @@
 -- Propósito: Confirmar desde el totem un turno de HOY del paciente,
 --            asignándole Estado = 2.
 --            Solo actualiza si el turno es del paciente (DNI + Cliente),
---            de la sucursal del totem, de hoy y no está cancelado (Estado = 4).
+--            de la sucursal del totem, de hoy y está pendiente (Estado = 1).
 --            Devuelve Filas = 1 si se confirmó, 0 si no cumple las condiciones.
 -- ============================================================
 -- exec spTotemTurnoConfirmarUpd 11, 16, '30738807', 12345
@@ -37,7 +37,7 @@ BEGIN
       AND p.DocumentoNro = @Dni COLLATE Modern_Spanish_CI_AS
       AND t.Fecha >= @Hoy
       AND t.Fecha < @Manana
-      AND ISNULL(t.Estado, 0) <> 4;
+      AND t.Estado = 1;
 
     SELECT @@ROWCOUNT AS Filas;
 END

@@ -4,8 +4,9 @@
 --            de HOY en la sucursal del totem.
 --            Devuelve dos result sets:
 --              1) Paciente (0 o 1 fila). Sin filas = paciente no encontrado.
---              2) Turnos de hoy en la sucursal, ordenados por hora
---                 (0..N filas). Sin filas = paciente sin turnos hoy.
+--              2) Turnos de hoy en la sucursal pendientes de confirmar
+--                 (Estado = 1), ordenados por hora (0..N filas).
+--                 Sin filas = paciente sin turnos pendientes hoy.
 -- ============================================================
 -- exec spTotemAtencionPorDniSel 11, 16, '30738807'
 IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'spTotemAtencionPorDniSel')
@@ -58,11 +59,11 @@ BEGIN
               AND t.SucursalId = @SucursalId
               AND t.Fecha >= @Hoy
               AND t.Fecha < @Manana
-              AND ISNULL(t.Estado, 0) <> 4
+              AND t.Estado = 1
         ) THEN 0 ELSE 1 END,
         pa.Codigo DESC;
 
-    -- 2) Turnos de hoy en la sucursal del totem, sin los cancelados (Estado = 4).
+    -- 2) Turnos de hoy en la sucursal del totem pendientes de confirmar (Estado = 1).
     SELECT
         t.Codigo,
         t.Fecha,
@@ -82,7 +83,7 @@ BEGIN
     WHERE t.SucursalId = @SucursalId
       AND t.Fecha >= @Hoy
       AND t.Fecha < @Manana
-      AND ISNULL(t.Estado, 0) <> 4
+      AND t.Estado = 1
     ORDER BY t.Hora;
 END
 GO

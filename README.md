@@ -120,8 +120,8 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | --- | --- | --- | --- |
 | POST | `api/auth/login` | No | `{ NombreUsuario, Contrasena }` → `{ Token, Usuario, Sucursales: [{ Codigo, Nombre }] }` |
 | POST | `api/auth/refresh` | JWT | Renueva el token |
-| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Particular }] }` (todos los turnos de hoy en la sucursal, sin cancelados) |
-| POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente o esta cancelado |
+| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Particular }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
+| POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente o no esta pendiente |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por
 defecto (`JwtExpirationMinutes`), porque el totem queda logueado.
@@ -137,9 +137,9 @@ Los scripts estan en `base de datos/` (misma estructura que
 - `Diagnostico/01_diagnostico_columnas_totem.sql`: ejecutar antes de impactar
   los SPs para confirmar las columnas asumidas.
 
-Estados de turno usados: `4` = cancelado (no se muestra), `2` = confirmado
-en el totem. Solo se confirman turnos con mutual; los particulares van a
-Recepcion sin cambiar de estado.
+Estados de turno usados: `1` = pendiente (el unico que muestra el totem),
+`2` = confirmado en el totem. Solo se confirman turnos con mutual; los
+particulares van a Recepcion sin cambiar de estado.
 
 Usuarios: `BdCentral..Usuario` (`Sistema = 45`). Sucursales:
 `BdCentral..Sucursal` con `ClienteId = Usuario.Cliente`. Turnos y pacientes:
