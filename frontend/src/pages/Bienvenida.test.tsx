@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { API_BASE_URL } from '../config';
 import { Bienvenida } from './Bienvenida';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTotemStore } from '../store/useTotemStore';
@@ -73,9 +74,9 @@ describe('Bienvenida', () => {
     ingresarDni('30738807');
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/atencion?sucursal=16&dni=30738807');
+    expect(fetchMock.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/atencion?sucursal=16&dni=30738807`);
     const [urlConfirmar, initConfirmar] = fetchMock.mock.calls[1];
-    expect(urlConfirmar).toBe('/api/atencion/confirmar');
+    expect(urlConfirmar).toBe(`${API_BASE_URL}/api/atencion/confirmar`);
     expect(JSON.parse(initConfirmar.body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 11 });
     expect(useTotemStore.getState().confirmacion).toMatchObject({
       tipo: 'turno',

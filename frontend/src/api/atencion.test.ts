@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { API_BASE_URL } from '../config';
 import { buscarAtencion } from './atencion';
 import { useAuthStore } from '../store/useAuthStore';
 import { mockFetch, respuestaJson } from '../tests/fetchMock';
@@ -27,7 +28,7 @@ describe('buscarAtencion', () => {
     const resultado = await buscarAtencion(16, '30738807');
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('/api/atencion?sucursal=16&dni=30738807');
+    expect(url).toBe(`${API_BASE_URL}/api/atencion?sucursal=16&dni=30738807`);
     expect(init.headers.Authorization).toBe('Bearer jwt-123');
     expect(resultado).toEqual({
       tipo: 'turnos',

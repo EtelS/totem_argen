@@ -13,14 +13,8 @@ stored procedures en `base de datos/`.
 
 1. Levantar el backend (ver seccion 7) desde Visual Studio; IIS Express
    queda en `http://localhost:62301`.
-2. Crear `frontend/.env.local` con la URL del backend:
-
-   ```ini
-   VITE_API_BASE_URL=http://localhost:62301
-   ```
-
-   Si el frontend se sirve desde el mismo sitio IIS que la API, dejarla
-   vacia (se usan rutas relativas `/api/...`).
+2. Verificar la URL de la API en `frontend/src/config.ts`
+   (`API_BASE_URL`). Para pruebas locales: `http://localhost:62301`.
 3. Levantar el frontend:
 
    ```bash
@@ -29,7 +23,31 @@ stored procedures en `base de datos/`.
    npm run dev
    ```
 
-Abrir <http://localhost:5173>.
+Abrir <http://localhost:5173/TotemArgensoft/>.
+
+### Publicar el frontend en IIS
+
+Se publica en <https://www.argensoft.net/TotemArgensoft/>. La subruta esta
+fijada en `base` de `frontend/vite.config.ts` y el router la toma de ahi.
+
+1. En `frontend/src/config.ts`, cambiar `API_BASE_URL` por la URL publica
+   de TotemApi (ej. `https://www.argensoft.net/WebServices/TotemApi`).
+2. Compilar:
+
+   ```bash
+   cd frontend
+   npm run build
+   ```
+
+3. Copiar el contenido de `frontend/dist/` (incluye `web.config`) a la
+   carpeta `TotemArgensoft` del sitio en IIS.
+4. Volver `API_BASE_URL` a `http://localhost:62301` para seguir probando
+   en local.
+
+Requisitos en IIS: modulo **URL Rewrite** instalado (el `web.config`
+redirige todas las rutas de la SPA a `index.html`). El `web.config` sale de
+`frontend/public/web.config`; si cambia la subruta, actualizar ahi tambien
+la ruta de `index.html`.
 
 ## 3. Integracion con la API
 

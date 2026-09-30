@@ -1,6 +1,5 @@
+import { API_BASE_URL } from '../config';
 import { useAuthStore } from '../store/useAuthStore';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
 
 export class ApiError extends Error {
   constructor(
@@ -31,7 +30,7 @@ export async function apiFetch<T>(path: string, { method = 'GET', body, autentic
     }
   }
 
-  const respuesta = await fetch(`${API_BASE_URL}${path}`, {
+  const respuesta = await fetch(`${API_BASE_URL.replace(/\/+$/, '')}${path}`, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
