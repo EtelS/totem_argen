@@ -1,0 +1,19 @@
+primer versión
+- si el documento no existe, solicito el nombre y lo mando a recepción
+- si el documento existe, le muestro turnos pendientes
+
+llamador de recepción:
+llama a los pacientes por nombre
+
+
+segunda versión
+autoatención
+ - pedir token
+ - cargar practica por defecto
+ - cambiar el estado del turno
+
+
+
+tercer versión
+- multi totem
+- colas de recepción esta pensada
