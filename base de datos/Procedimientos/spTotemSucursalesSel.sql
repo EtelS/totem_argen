@@ -18,6 +18,7 @@ BEGIN
         s.Nombre
     FROM BdCentral..Sucursal s
     WHERE s.ClienteId = @Cliente
+		and Activo = 1
     ORDER BY s.Nombre
 END
 GO
