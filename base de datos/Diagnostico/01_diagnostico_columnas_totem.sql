@@ -5,6 +5,8 @@
 --   - BDTurnero..Paciente: Nombre / Apellido (asumidos, no confirmados).
 --   - BDTurnero..Turno: tipo de Fecha y Hora (el SP formatea Hora a 'HH:mm').
 --   - BdCentral..Sucursal: ClienteId y si existe un flag de habilitada.
+--   - BDTurnero..SucursalPorMutual: TotemAutogestion / PideCodigoSeguridad
+--     y que no haya filas duplicadas por SucursalId + MutualId.
 -- ============================================================
 
 -- BLOQUE 1 - Columnas de BDTurnero
@@ -34,3 +36,18 @@ SELECT TOP 50 Codigo, Nombre
 FROM BDTurnero..Mutual WITH (NOLOCK)
 WHERE Nombre LIKE '%particular%'
 ORDER BY Nombre;
+
+-- BLOQUE 4 - Columnas de BDTurnero..SucursalPorMutual
+SELECT c.name AS Columna, ty.name AS Tipo, c.is_nullable AS EsNullable
+FROM BDTurnero.sys.columns c
+INNER JOIN BDTurnero.sys.tables t ON t.object_id = c.object_id
+INNER JOIN BDTurnero.sys.types ty ON ty.user_type_id = c.user_type_id
+WHERE t.name = 'SucursalPorMutual'
+ORDER BY c.column_id;
+
+-- BLOQUE 5 - Duplicados por SucursalId + MutualId. Los SPs del totem toman
+--            la fila más reciente (Codigo DESC); revisar que sea la correcta.
+SELECT SucursalId, MutualId, COUNT(*) AS Filas
+FROM BDTurnero..SucursalPorMutual WITH (NOLOCK)
+GROUP BY SucursalId, MutualId
+HAVING COUNT(*) > 1;

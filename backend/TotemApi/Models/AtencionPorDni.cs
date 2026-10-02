@@ -24,5 +24,7 @@ namespace TotemApi.Models
         public string Hora { get; set; }
         public string Prestador { get; set; }
         public string Mutual { get; set; }
+        public bool TotemAutogestion { get; set; }
+        public bool PideCodigoSeguridad { get; set; }
     }
 }

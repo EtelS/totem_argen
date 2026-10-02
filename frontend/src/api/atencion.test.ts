@@ -19,8 +19,8 @@ describe('buscarAtencion', () => {
         Tipo: 'turnos',
         Paciente: { Dni: '30738807', NombreYApellido: 'Etel Perez', Mutual: 'SWISS MEDICAL' },
         Turnos: [
-          { Codigo: 10, Fecha: '29/09/2026', Hora: '10:00', Prestador: 'Diaz Carla', Mutual: null, Particular: true },
-          { Codigo: 11, Fecha: '29/09/2026', Hora: '15:00', Prestador: 'Romo Guillermo', Mutual: 'SWISS MEDICAL', Particular: false },
+          { Codigo: 10, Fecha: '29/09/2026', Hora: '10:00', Prestador: 'Diaz Carla', Mutual: null, Autogestion: false, PideCodigoSeguridad: false },
+          { Codigo: 11, Fecha: '29/09/2026', Hora: '15:00', Prestador: 'Romo Guillermo', Mutual: 'SWISS MEDICAL', Autogestion: true, PideCodigoSeguridad: false },
         ],
       }),
     );
@@ -34,8 +34,8 @@ describe('buscarAtencion', () => {
       tipo: 'turnos',
       paciente: { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'SWISS MEDICAL' },
       turnos: [
-        { codigo: 10, fecha: '29/09/2026', hora: '10:00', prestador: 'Diaz Carla', mutual: '', particular: true },
-        { codigo: 11, fecha: '29/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'SWISS MEDICAL', particular: false },
+        { codigo: 10, fecha: '29/09/2026', hora: '10:00', prestador: 'Diaz Carla', mutual: '', autogestion: false, pideCodigoSeguridad: false },
+        { codigo: 11, fecha: '29/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'SWISS MEDICAL', autogestion: true, pideCodigoSeguridad: false },
       ],
     });
   });

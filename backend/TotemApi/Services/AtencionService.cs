@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using TotemApi.Models;
 
@@ -34,15 +33,11 @@ namespace TotemApi.Services
                     Hora = t.Hora,
                     Prestador = t.Prestador,
                     Mutual = t.Mutual,
-                    Particular = EsParticular(t.Mutual)
+                    // Configured per sucursal and mutual in BDTurnero..SucursalPorMutual.
+                    Autogestion = t.TotemAutogestion,
+                    PideCodigoSeguridad = t.TotemAutogestion && t.PideCodigoSeguridad
                 }).ToList()
             };
-        }
-
-        private static bool EsParticular(string mutual)
-        {
-            return string.IsNullOrWhiteSpace(mutual)
-                || mutual.Trim().Equals("particular", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

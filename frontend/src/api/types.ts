@@ -7,8 +7,6 @@ export interface Paciente {
   dni: string;
   nombreYApellido: string;
   mutual: string;
-  /** Token the mutual requires at check-in. The backend does not provide it yet. */
-  token?: string;
 }
 
 export interface Turno {
@@ -17,6 +15,8 @@ export interface Turno {
   hora: string;
   prestador: string;
   mutual: string;
-  /** Particular turnos are not confirmed at the totem; choosing one sends the patient to Recepcion. */
-  particular: boolean;
+  /** Only autogestion turnos are confirmed at the totem; choosing any other sends the patient to Recepcion. */
+  autogestion: boolean;
+  /** The patient must enter the mutual's security token before confirming. */
+  pideCodigoSeguridad: boolean;
 }

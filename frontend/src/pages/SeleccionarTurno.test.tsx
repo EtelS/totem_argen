@@ -13,7 +13,7 @@ const TURNO_PARTICULAR = {
   hora: '10:00',
   prestador: 'Diaz Carla',
   mutual: 'particular',
-  particular: true,
+  autogestion: false, pideCodigoSeguridad: false,
 };
 const TURNO_MUTUAL = {
   codigo: 11,
@@ -21,7 +21,7 @@ const TURNO_MUTUAL = {
   hora: '15:00',
   prestador: 'Romo Guillermo',
   mutual: 'swiss medical',
-  particular: false,
+  autogestion: true, pideCodigoSeguridad: false,
 };
 
 function renderSeleccionarTurno() {
@@ -73,7 +73,7 @@ describe('SeleccionarTurno', () => {
     expect(useTotemStore.getState().seleccionTurno).toBeNull();
   });
 
-  it('deriva a Recepcion con numero, sin confirmar en el backend, cuando el turno elegido es particular', async () => {
+  it('deriva a Recepcion con numero, sin confirmar en el backend, cuando la mutual del turno elegido no tiene autogestion', async () => {
     const fetchMock = mockFetch();
     renderSeleccionarTurno();
 

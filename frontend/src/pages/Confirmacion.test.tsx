@@ -14,8 +14,8 @@ describe('Confirmacion', () => {
       dni: '30738807',
       confirmacion: {
         tipo: 'turno',
-        paciente: { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical', token: '123' },
-        turno: { codigo: 1, fecha: '17/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'swiss medical', particular: false },
+        paciente: { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical' },
+        turno: { codigo: 1, fecha: '17/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'swiss medical', autogestion: true, pideCodigoSeguridad: false },
       },
     });
 
@@ -39,7 +39,7 @@ describe('Confirmacion', () => {
       confirmacion: {
         tipo: 'derivado',
         numero: 1,
-        paciente: { dni: '29712252', nombreYApellido: 'Mauro Herrera', mutual: 'particular', token: '' },
+        paciente: { dni: '29712252', nombreYApellido: 'Mauro Herrera', mutual: 'particular' },
       },
     });
 

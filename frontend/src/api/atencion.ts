@@ -7,7 +7,8 @@ interface TurnoDto {
   Hora: string;
   Prestador: string;
   Mutual: string | null;
-  Particular: boolean;
+  Autogestion: boolean;
+  PideCodigoSeguridad: boolean;
 }
 
 interface AtencionResponseDto {
@@ -38,7 +39,8 @@ export async function buscarAtencion(sucursalId: number, dni: string): Promise<R
         hora: t.Hora,
         prestador: t.Prestador,
         mutual: t.Mutual ?? '',
-        particular: t.Particular,
+        autogestion: t.Autogestion,
+        pideCodigoSeguridad: t.PideCodigoSeguridad,
       })),
     };
   }

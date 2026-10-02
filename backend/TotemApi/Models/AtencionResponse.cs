@@ -27,7 +27,9 @@ namespace TotemApi.Models
         public string Hora { get; set; }
         public string Prestador { get; set; }
         public string Mutual { get; set; }
-        // A particular turno cannot be confirmed at the totem: choosing it sends the patient to Recepcion.
-        public bool Particular { get; set; }
+        // Only Autogestion turnos are confirmed at the totem; the rest send the patient to Recepcion.
+        public bool Autogestion { get; set; }
+        // The patient must enter the mutual's security token before confirming.
+        public bool PideCodigoSeguridad { get; set; }
     }
 }

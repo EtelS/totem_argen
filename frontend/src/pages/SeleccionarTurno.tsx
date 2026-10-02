@@ -49,7 +49,7 @@ export function SeleccionarTurno() {
             <span className="text-totem-lg font-bold">
               {turno.hora} - {turno.prestador}
             </span>
-            <span className="text-xl capitalize">{turno.particular ? 'Particular' : turno.mutual}</span>
+            <span className="text-xl capitalize">{turno.mutual || 'Particular'}</span>
           </button>
         ))}
       </div>

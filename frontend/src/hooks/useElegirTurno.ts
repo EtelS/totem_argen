@@ -4,9 +4,10 @@ import { useTotemStore } from '../store/useTotemStore';
 import { useConfirmarTurno } from './useConfirmarTurno';
 
 /**
- * Resuelve el turno que eligio el paciente: si es particular se deriva a
- * Recepcion con numero de orden (sin cambiar su estado); si la mutual pide
- * token se pasa a `/token`; si no, se confirma el turno en el backend.
+ * Resuelve el turno que eligio el paciente: si su mutual no tiene
+ * autogestion en la sucursal se deriva a Recepcion con numero de orden (sin
+ * cambiar su estado); si la mutual pide codigo de seguridad se pasa a
+ * `/token`; si no, se confirma el turno en el backend.
  */
 export function useElegirTurno() {
   const navigate = useNavigate();
@@ -17,14 +18,14 @@ export function useElegirTurno() {
   const confirmar = useConfirmarTurno();
 
   return async (paciente: Paciente, turno: Turno) => {
-    if (turno.particular) {
+    if (!turno.autogestion) {
       setSeleccionTurno(null);
       setConfirmacion({ tipo: 'derivado', numero: siguienteNumero(), paciente });
       navigate('/confirmacion');
       return;
     }
 
-    if (paciente.token) {
+    if (turno.pideCodigoSeguridad) {
       setSeleccionTurno(null);
       setPendienteToken({ paciente, turno });
       navigate('/token');

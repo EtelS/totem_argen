@@ -77,17 +77,21 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
 2. El paciente ingresa su DNI con el teclado numerico (`/`).
    - Si tiene **varios turnos hoy** en la sucursal del totem, elige cual
      confirmar (`/seleccionar-turno`). Con uno solo se sigue directo.
-   - Si el turno elegido es particular, se deriva a Recepcion (paso 4).
-3. Si el turno elegido tiene mutual/obra social (no "particular"):
-   - Si la mutual requiere token, se pide ingresarlo (`/token`). **Hoy el
-     backend no informa tokens**, por lo que este paso no se dispara. Si
-     coincide, se confirma el turno (`/confirmacion`) avisando que lo llamaran por consultorio. Si no
-     coincide, se da una segunda oportunidad; si vuelve a fallar, se le
-     asigna un numero de orden, se muestra su nombre y se le avisa que sera
-     atendido en Recepcion (`/confirmacion`).
-   - Si la mutual no requiere token, se confirma el turno directamente:
+   - El flujo depende de la configuracion de la mutual del turno (o la del
+     paciente si el turno no tiene) en la sucursal del totem, tabla
+     `BDTurnero..SucursalPorMutual`:
+     - `TotemAutogestion` = 0, NULL o sin fila: se deriva a Recepcion (paso 4),
+       como un turno particular.
+     - `TotemAutogestion` = 1: autogestion en el totem (paso 3).
+3. Si la mutual del turno tiene autogestion:
+   - Si `PideCodigoSeguridad` = 1, se pide el token de la mutual (`/token`).
+     **Por ahora el token solo se solicita**: no se valida ni se guarda
+     (la validacion contra el servicio de la mutual aun no existe). Al
+     ingresarlo se confirma el turno (`/confirmacion`) avisando que lo
+     llamaran por consultorio.
+   - Si no pide codigo de seguridad, se confirma el turno directamente:
      prestador, fecha, hora y mutual (`/confirmacion`).
-4. Si el paciente es particular, no tiene turno para el dia de hoy, o no se
+4. Si la mutual del turno no tiene autogestion, el paciente no tiene turno para el dia de hoy, o no se
    encuentra, se le asigna un numero de orden progresivo y
    se lo deriva a Recepcion (`/confirmacion`). Si el DNI pertenece a un
    paciente conocido (aunque sea particular o sin turno hoy), se muestra su
@@ -99,7 +103,7 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
 
 Requiere los SPs impactados y un usuario de `BdCentral..Usuario` con
 `Sistema = 45`. Con un paciente que tenga turno hoy en la sucursal del
-totem y mutual distinta de "particular" se confirma el turno; con varios
+totem y mutual con `TotemAutogestion = 1` en `SucursalPorMutual` se confirma el turno; con varios
 turnos hoy se pide elegir uno; cualquier otro DNI de 7-8 digitos recibe
 numero de orden.
 
@@ -138,8 +142,8 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | --- | --- | --- | --- |
 | POST | `api/auth/login` | No | `{ NombreUsuario, Contrasena }` → `{ Token, Usuario, Sucursales: [{ Codigo, Nombre }] }` |
 | POST | `api/auth/refresh` | JWT | Renueva el token |
-| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Particular }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
-| POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente o no esta pendiente |
+| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
+| POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente, no esta pendiente o su mutual no tiene `TotemAutogestion = 1` |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por
 defecto (`JwtExpirationMinutes`), porque el totem queda logueado.
@@ -156,8 +160,9 @@ Los scripts estan en `base de datos/` (misma estructura que
   los SPs para confirmar las columnas asumidas.
 
 Estados de turno usados: `1` = pendiente (el unico que muestra el totem),
-`2` = confirmado en el totem. Solo se confirman turnos con mutual; los
-particulares van a Recepcion sin cambiar de estado.
+`2` = confirmado en el totem. Solo se confirman turnos cuya mutual tiene
+`TotemAutogestion = 1` en la sucursal; el resto va a Recepcion sin cambiar
+de estado.
 
 Usuarios: `BdCentral..Usuario` (`Sistema = 45`). Sucursales:
 `BdCentral..Sucursal` con `ClienteId = Usuario.Cliente`. Turnos y pacientes:

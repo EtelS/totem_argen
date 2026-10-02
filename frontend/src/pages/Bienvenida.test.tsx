@@ -14,7 +14,7 @@ const TURNO_MUTUAL_DTO = {
   Hora: '15:00',
   Prestador: 'Romo Guillermo',
   Mutual: 'SWISS MEDICAL',
-  Particular: false,
+  Autogestion: true, PideCodigoSeguridad: false,
 };
 const TURNO_PARTICULAR_DTO = {
   Codigo: 10,
@@ -22,7 +22,7 @@ const TURNO_PARTICULAR_DTO = {
   Hora: '10:00',
   Prestador: 'Diaz Carla',
   Mutual: 'particular',
-  Particular: true,
+  Autogestion: false, PideCodigoSeguridad: false,
 };
 
 function renderBienvenida() {
@@ -32,6 +32,7 @@ function renderBienvenida() {
         <Route path="/" element={<Bienvenida />} />
         <Route path="/seleccionar-turno" element={<p>pantalla seleccionar turno</p>} />
         <Route path="/confirmacion" element={<p>pantalla confirmacion</p>} />
+        <Route path="/token" element={<p>pantalla token</p>} />
         <Route path="/error" element={<p>pantalla error</p>} />
       </Routes>
     </MemoryRouter>,
@@ -97,7 +98,7 @@ describe('Bienvenida', () => {
     expect(useTotemStore.getState().confirmacion).toBeNull();
   });
 
-  it('deriva a Recepcion sin confirmar en el backend cuando el unico turno de hoy es particular', async () => {
+  it('deriva a Recepcion sin confirmar en el backend cuando la mutual del unico turno de hoy no tiene autogestion', async () => {
     const fetchMock = mockFetch(respuestaJson(200, { Tipo: 'turnos', Paciente: PACIENTE_DTO, Turnos: [TURNO_PARTICULAR_DTO] }));
     renderBienvenida();
 
@@ -105,6 +106,24 @@ describe('Bienvenida', () => {
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
     expect(useTotemStore.getState().confirmacion).toMatchObject({ tipo: 'derivado', numero: 1 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('pide el token sin confirmar en el backend cuando la mutual pide codigo de seguridad', async () => {
+    const fetchMock = mockFetch(
+      respuestaJson(200, {
+        Tipo: 'turnos',
+        Paciente: PACIENTE_DTO,
+        Turnos: [{ ...TURNO_MUTUAL_DTO, PideCodigoSeguridad: true }],
+      }),
+    );
+    renderBienvenida();
+
+    ingresarDni('30738807');
+
+    expect(await screen.findByText('pantalla token')).toBeInTheDocument();
+    expect(useTotemStore.getState().pendienteToken?.turno).toMatchObject({ codigo: 11, pideCodigoSeguridad: true });
+    expect(useTotemStore.getState().confirmacion).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

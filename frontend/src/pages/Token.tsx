@@ -5,23 +5,18 @@ import { BotonAyuda } from '../components/BotonAyuda';
 import { useTotemStore } from '../store/useTotemStore';
 import { useConfirmarTurno } from '../hooks/useConfirmarTurno';
 
-const MAX_INTENTOS = 2;
-
 /**
- * Pantalla de token (`/token`) para mutuales que lo requieren (ej. Swiss
- * Medical). Si el token no coincide, se da una segunda oportunidad; si
- * vuelve a fallar, se deriva a Recepcion con un numero de orden.
+ * Pantalla de token (`/token`) para mutuales con PideCodigoSeguridad en la
+ * sucursal. Por ahora el token solo se solicita: no se valida ni se guarda
+ * hasta que exista la integracion con el servicio de la mutual.
  */
 export function Token() {
   const pendienteToken = useTotemStore((s) => s.pendienteToken);
   const setPendienteToken = useTotemStore((s) => s.setPendienteToken);
-  const setConfirmacion = useTotemStore((s) => s.setConfirmacion);
-  const siguienteNumero = useTotemStore((s) => s.siguienteNumero);
   const navigate = useNavigate();
   const confirmar = useConfirmarTurno();
 
   const [valor, setValor] = useState('');
-  const [intentos, setIntentos] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -40,26 +35,17 @@ export function Token() {
       return;
     }
 
-    if (valor === pendienteToken.paciente.token) {
-      setEnviando(true);
-      // Cleared after confirming: clearing first would trigger the redirect to '/' above.
-      await confirmar(pendienteToken.paciente, pendienteToken.turno);
-      setPendienteToken(null);
+    if (!valor) {
+      setError('Ingresa el token de tu mutual');
       return;
     }
 
-    const intentosRealizados = intentos + 1;
-
-    if (intentosRealizados >= MAX_INTENTOS) {
-      setConfirmacion({ tipo: 'derivado', numero: siguienteNumero(), paciente: pendienteToken.paciente });
-      setPendienteToken(null);
-      navigate('/confirmacion');
-      return;
-    }
-
-    setIntentos(intentosRealizados);
-    setValor('');
-    setError('Token incorrecto. Intenta nuevamente.');
+    // TODO: validate the token against the mutual's service once it exists.
+    setError(null);
+    setEnviando(true);
+    // Cleared after confirming: clearing first would trigger the redirect to '/' above.
+    await confirmar(pendienteToken.paciente, pendienteToken.turno);
+    setPendienteToken(null);
   }
 
   return (

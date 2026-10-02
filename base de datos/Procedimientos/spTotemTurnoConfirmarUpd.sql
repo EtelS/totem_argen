@@ -3,7 +3,10 @@
 -- Propósito: Confirmar desde el totem un turno de HOY del paciente,
 --            asignándole Estado = 2.
 --            Solo actualiza si el turno es del paciente (DNI + Cliente),
---            de la sucursal del totem, de hoy y está pendiente (Estado = 1).
+--            de la sucursal del totem, de hoy, está pendiente (Estado = 1)
+--            y su mutual tiene TotemAutogestion = 1 en la sucursal (si hay
+--            filas duplicadas en SucursalPorMutual se toma la más reciente,
+--            mismo criterio que spTotemAtencionPorDniSel).
 --            Devuelve Filas = 1 si se confirmó, 0 si no cumple las condiciones.
 -- ============================================================
 -- exec spTotemTurnoConfirmarUpd 11, 16, '30738807', 12345
@@ -31,7 +34,15 @@ BEGIN
     INNER JOIN BdCentral..Sucursal s
         ON s.Codigo = t.SucursalId
        AND s.ClienteId = @Cliente
+    CROSS APPLY (
+        SELECT TOP 1 x.TotemAutogestion
+        FROM BDTurnero..SucursalPorMutual x
+        WHERE x.SucursalId = t.SucursalId
+          AND x.MutualId = ISNULL(t.Mutual, p.MutualId)
+        ORDER BY x.Codigo DESC
+    ) spm
     WHERE t.Codigo = @TurnoId
+      AND spm.TotemAutogestion = 1
       AND t.SucursalId = @SucursalId
       AND p.Cliente = @Cliente
       AND p.DocumentoNro = @Dni COLLATE Modern_Spanish_CI_AS
