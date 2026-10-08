@@ -6,17 +6,30 @@ import { BotonAyuda } from '../components/BotonAyuda';
 export function Confirmacion() {
   const confirmacion = useTotemStore((s) => s.confirmacion);
   const reset = useTotemStore((s) => s.reset);
+  const setSeleccionTurno = useTotemStore((s) => s.setSeleccionTurno);
+  const setPendienteToken = useTotemStore((s) => s.setPendienteToken);
   const navigate = useNavigate();
 
+  // Cleared here, once the previous screens unmounted: clearing them before
+  // navigating would trigger their own redirect to '/'.
+  useEffect(() => {
+    setSeleccionTurno(null);
+    setPendienteToken(null);
+  }, [setSeleccionTurno, setPendienteToken]);
+
+  
   useEffect(() => {
     if (!confirmacion) {
       navigate('/');
     }
   }, [confirmacion, navigate]);
 
+
   if (!confirmacion) {
+    
     return null;
   }
+
 
   function imprimir() {
     // Mock simple de impresora termica en el frontend (ver README - supuestos).
@@ -39,6 +52,8 @@ export function Confirmacion() {
             <p className="text-2xl">Fecha: {confirmacion.turno.fecha}</p>
             <p className="text-2xl">Hora: {confirmacion.turno.hora}</p>
             <p className="mt-4 text-2xl capitalize">Mutual: {confirmacion.turno.mutual}</p>
+            <p className="mt-6 text-2xl">Tu numero es</p>
+            <p className="text-totem-xl font-extrabold text-totem-success">{confirmacion.numero}</p>
           </div>
         </>
       ) : (
@@ -55,16 +70,16 @@ export function Confirmacion() {
               numero.
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={imprimir}
-            className="w-full rounded-full bg-totem-accent py-6 text-totem-lg font-bold text-white shadow-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-totem-navy"
-          >
-            Imprimir ticket
-          </button>
         </>
       )}
+
+      <button
+        type="button"
+        onClick={imprimir}
+        className="w-full rounded-full bg-totem-accent py-6 text-totem-lg font-bold text-white shadow-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-totem-navy"
+      >
+        Imprimir ticket
+      </button>
 
       <button
         type="button"

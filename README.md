@@ -77,11 +77,14 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
 2. El paciente ingresa su DNI con el teclado numerico (`/`).
    - Si tiene **varios turnos hoy** en la sucursal del totem, elige cual
      confirmar (`/seleccionar-turno`). Con uno solo se sigue directo.
+   - Al elegir el turno se registra al paciente en la cola de Recepcion
+     (`spTotemInsertarLlamado`); el backend genera el numero de llamado,
+     correlativo diario por sucursal.
    - El flujo depende de la configuracion de la mutual del turno (o la del
      paciente si el turno no tiene) en la sucursal del totem, tabla
      `BDTurnero..SucursalPorMutual`:
-     - `TotemAutogestion` = 0, NULL o sin fila: se deriva a Recepcion (paso 4),
-       como un turno particular.
+     - `TotemAutogestion` = 0, NULL o sin fila: se deriva a Recepcion con el
+       numero de llamado, como un turno particular.
      - `TotemAutogestion` = 1: autogestion en el totem (paso 3).
 3. Si la mutual del turno tiene autogestion:
    - Si `PideCodigoSeguridad` = 1, se pide el token de la mutual (`/token`).
@@ -91,9 +94,12 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
      llamaran por consultorio.
    - Si no pide codigo de seguridad, se confirma el turno directamente:
      prestador, fecha, hora y mutual (`/confirmacion`).
+   - En ambos casos la confirmacion muestra el numero de llamado y permite
+     imprimir el ticket.
 4. Si la mutual del turno no tiene autogestion, el paciente no tiene turno para el dia de hoy, o no se
-   encuentra, se le asigna un numero de orden progresivo y
-   se lo deriva a Recepcion (`/confirmacion`). Si el DNI pertenece a un
+   encuentra, se registra el llamado en Recepcion (`spTotemInsertarLlamado`,
+   con `PacienteId` NULL si el DNI no existe) y se lo deriva a Recepcion con
+   ese numero (`/confirmacion`). Si el DNI pertenece a un
    paciente conocido (aunque sea particular o sin turno hoy), se muestra su
    nombre en la pantalla de derivacion.
 5. El boton "Necesito ayuda" (visible en todas las pantallas del flujo de
@@ -105,7 +111,7 @@ Requiere los SPs impactados y un usuario de `BdCentral..Usuario` con
 `Sistema = 45`. Con un paciente que tenga turno hoy en la sucursal del
 totem y mutual con `TotemAutogestion = 1` en `SucursalPorMutual` se confirma el turno; con varios
 turnos hoy se pide elegir uno; cualquier otro DNI de 7-8 digitos recibe
-numero de orden.
+numero de llamado (se puede verificar en `BDTurnero..TurnoTotemRecepcion`).
 
 ## 6. Tests
 
@@ -142,8 +148,9 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | --- | --- | --- | --- |
 | POST | `api/auth/login` | No | `{ NombreUsuario, Contrasena }` → `{ Token, Usuario, Sucursales: [{ Codigo, Nombre }] }` |
 | POST | `api/auth/refresh` | JWT | Renueva el token |
-| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
+| GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente: { Codigo, Dni, NombreYApellido, Mutual }, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
 | POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente, no esta pendiente o su mutual no tiene `TotemAutogestion = 1` |
+| POST | `api/atencion/llamado` | JWT | `{ Sucursal, Dni, PacienteCodigo }` → `{ Numero }`: registra en `TurnoTotemRecepcion` con el numero de llamado del dia (correlativo por sucursal). `PacienteCodigo` null si el DNI no existe. 404 si el paciente o la sucursal no son del cliente |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por
 defecto (`JwtExpirationMinutes`), porque el totem queda logueado.
@@ -155,7 +162,7 @@ Los scripts estan en `base de datos/` (misma estructura que
 
 - `Procedimientos/`: `spTotemAuthUsuarioSel`, `spTotemUsuarioPorCodigoSel`,
   `spTotemSucursalesSel`, `spTotemAtencionPorDniSel`,
-  `spTotemTurnoConfirmarUpd`.
+  `spTotemTurnoConfirmarUpd`, `spTotemInsertarLlamado`.
 - `Diagnostico/01_diagnostico_columnas_totem.sql`: ejecutar antes de impactar
   los SPs para confirmar las columnas asumidas.
 

@@ -6,7 +6,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useTotemStore } from '../store/useTotemStore';
 import { mockFetch, respuestaJson } from '../tests/fetchMock';
 
-const PACIENTE = { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical' };
+const PACIENTE = { codigo: 501, dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical' };
 const TURNO_PARTICULAR = {
   codigo: 10,
   fecha: '29/09/2026',
@@ -44,7 +44,6 @@ describe('SeleccionarTurno', () => {
       seleccionTurno: { paciente: PACIENTE, turnos: [TURNO_PARTICULAR, TURNO_MUTUAL] },
       pendienteToken: null,
       confirmacion: null,
-      contador: 0,
     });
   });
 
@@ -62,26 +61,28 @@ describe('SeleccionarTurno', () => {
   });
 
   it('confirma en el backend el turno elegido cuando tiene mutual', async () => {
-    const fetchMock = mockFetch(respuestaJson(200, { Mensaje: 'Turno confirmado' }));
+    const fetchMock = mockFetch(respuestaJson(200, { Numero: 7 }), respuestaJson(200, { Mensaje: 'Turno confirmado' }));
     renderSeleccionarTurno();
 
     fireEvent.click(screen.getByRole('button', { name: /15:00 - Romo Guillermo/ }));
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 11 });
-    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'turno', paciente: PACIENTE, turno: TURNO_MUTUAL });
-    expect(useTotemStore.getState().seleccionTurno).toBeNull();
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501 });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 11 });
+    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'turno', numero: 7, paciente: PACIENTE, turno: TURNO_MUTUAL });
+    // Cleared by Confirmacion on mount: clearing it here would trigger this page's redirect to '/'.
+    expect(useTotemStore.getState().seleccionTurno).not.toBeNull();
   });
 
-  it('deriva a Recepcion con numero, sin confirmar en el backend, cuando la mutual del turno elegido no tiene autogestion', async () => {
-    const fetchMock = mockFetch();
+  it('deriva a Recepcion con el numero del llamado, sin confirmar en el backend, cuando la mutual del turno elegido no tiene autogestion', async () => {
+    const fetchMock = mockFetch(respuestaJson(200, { Numero: 7 }));
     renderSeleccionarTurno();
 
     fireEvent.click(screen.getByRole('button', { name: /10:00 - Diaz Carla/ }));
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 1, paciente: PACIENTE });
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 7, paciente: PACIENTE });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('vuelve al inicio si no hay turnos para elegir', () => {

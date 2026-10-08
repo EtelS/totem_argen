@@ -6,7 +6,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useTotemStore } from '../store/useTotemStore';
 import { mockFetch, respuestaJson } from '../tests/fetchMock';
 
-const PACIENTE = { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical' };
+const PACIENTE = { codigo: 501, dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'swiss medical' };
 const TURNO = {
   codigo: 1,
   fecha: '17/09/2026',
@@ -36,9 +36,8 @@ describe('Token', () => {
     useAuthStore.setState({ usuario: 'eteltotem', token: 'jwt-123', sucursal: { suc_id: 16, suc_nom: 'clinicademo' } });
     useTotemStore.setState({
       dni: '30738807',
-      pendienteToken: { paciente: PACIENTE, turno: TURNO },
+      pendienteToken: { paciente: PACIENTE, turno: TURNO, numero: 7 },
       confirmacion: null,
-      contador: 0,
     });
   });
 
@@ -54,9 +53,10 @@ describe('Token', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
 
     await waitFor(() => {
-      expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'turno', paciente: PACIENTE, turno: TURNO });
+      expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'turno', numero: 7, paciente: PACIENTE, turno: TURNO });
     });
-    expect(useTotemStore.getState().pendienteToken).toBeNull();
+    // Cleared by Confirmacion on mount: clearing it here would trigger this page's redirect to '/'.
+    expect(useTotemStore.getState().pendienteToken).not.toBeNull();
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 1 });
   });
 

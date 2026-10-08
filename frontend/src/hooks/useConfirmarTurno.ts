@@ -7,7 +7,7 @@ import { useTotemStore } from '../store/useTotemStore';
 
 /**
  * Registra en el backend la confirmacion del turno (Estado = 2) y recien
- * entonces muestra "Turno confirmado". Si el backend falla, el paciente no
+ * entonces muestra "Turno confirmado" con el numero de llamado. Si el backend falla, el paciente no
  * ve una confirmacion que no quedo registrada.
  */
 export function useConfirmarTurno() {
@@ -15,7 +15,7 @@ export function useConfirmarTurno() {
   const sucursal = useAuthStore((s) => s.sucursal);
   const setConfirmacion = useTotemStore((s) => s.setConfirmacion);
 
-  return async (paciente: Paciente, turno: Turno) => {
+  return async (paciente: Paciente, turno: Turno, numero: number) => {
     if (!sucursal) {
       return;
     }
@@ -30,7 +30,7 @@ export function useConfirmarTurno() {
       return;
     }
 
-    setConfirmacion({ tipo: 'turno', paciente, turno });
+    setConfirmacion({ tipo: 'turno', numero, paciente, turno });
     navigate('/confirmacion');
   };
 }

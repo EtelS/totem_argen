@@ -7,12 +7,13 @@ import { useAuthStore } from '../store/useAuthStore';
 import { ApiError } from '../api/client';
 import { buscarAtencion, ResultadoAtencion } from '../api/atencion';
 import { useElegirTurno } from '../hooks/useElegirTurno';
+import { useRegistrarLlamado } from '../hooks/useRegistrarLlamado';
 
 /**
  * Pantalla de bienvenida (`/`). Busca al paciente por DNI en el backend:
  * con varios turnos hoy el paciente elige cual confirmar
  * (`/seleccionar-turno`); con uno solo se resuelve directo. Sin turnos o sin
- * paciente, se deriva a Recepcion con un numero de orden.
+ * paciente, se registra el llamado y se deriva a Recepcion con su numero.
  */
 export function Bienvenida() {
   const [dni, setDni] = useState('');
@@ -23,8 +24,8 @@ export function Bienvenida() {
   const setDniStore = useTotemStore((s) => s.setDni);
   const setSeleccionTurno = useTotemStore((s) => s.setSeleccionTurno);
   const setConfirmacion = useTotemStore((s) => s.setConfirmacion);
-  const siguienteNumero = useTotemStore((s) => s.siguienteNumero);
   const elegirTurno = useElegirTurno();
+  const registrarLlamado = useRegistrarLlamado();
 
   async function continuar() {
     if (dni.length < 7) {
@@ -52,7 +53,12 @@ export function Bienvenida() {
     }
 
     if (resultado.tipo === 'derivado') {
-      setConfirmacion({ tipo: 'derivado', numero: siguienteNumero(), paciente: resultado.paciente });
+      const numero = await registrarLlamado(dni, resultado.paciente?.codigo ?? null);
+      setCargando(false);
+      if (numero === null) {
+        return;
+      }
+      setConfirmacion({ tipo: 'derivado', numero, paciente: resultado.paciente });
       navigate('/confirmacion');
       return;
     }

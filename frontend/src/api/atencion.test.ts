@@ -17,7 +17,7 @@ describe('buscarAtencion', () => {
     const fetchMock = mockFetch(
       respuestaJson(200, {
         Tipo: 'turnos',
-        Paciente: { Dni: '30738807', NombreYApellido: 'Etel Perez', Mutual: 'SWISS MEDICAL' },
+        Paciente: { Codigo: 501, Dni: '30738807', NombreYApellido: 'Etel Perez', Mutual: 'SWISS MEDICAL' },
         Turnos: [
           { Codigo: 10, Fecha: '29/09/2026', Hora: '10:00', Prestador: 'Diaz Carla', Mutual: null, Autogestion: false, PideCodigoSeguridad: false },
           { Codigo: 11, Fecha: '29/09/2026', Hora: '15:00', Prestador: 'Romo Guillermo', Mutual: 'SWISS MEDICAL', Autogestion: true, PideCodigoSeguridad: false },
@@ -32,7 +32,7 @@ describe('buscarAtencion', () => {
     expect(init.headers.Authorization).toBe('Bearer jwt-123');
     expect(resultado).toEqual({
       tipo: 'turnos',
-      paciente: { dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'SWISS MEDICAL' },
+      paciente: { codigo: 501, dni: '30738807', nombreYApellido: 'Etel Perez', mutual: 'SWISS MEDICAL' },
       turnos: [
         { codigo: 10, fecha: '29/09/2026', hora: '10:00', prestador: 'Diaz Carla', mutual: '', autogestion: false, pideCodigoSeguridad: false },
         { codigo: 11, fecha: '29/09/2026', hora: '15:00', prestador: 'Romo Guillermo', mutual: 'SWISS MEDICAL', autogestion: true, pideCodigoSeguridad: false },
@@ -50,7 +50,7 @@ describe('buscarAtencion', () => {
     mockFetch(
       respuestaJson(200, {
         Tipo: 'derivado',
-        Paciente: { Dni: '29712252', NombreYApellido: 'Mauro Herrera', Mutual: null },
+        Paciente: { Codigo: 502, Dni: '29712252', NombreYApellido: 'Mauro Herrera', Mutual: null },
         Turnos: null,
       }),
     );
@@ -58,7 +58,7 @@ describe('buscarAtencion', () => {
     const resultado = await buscarAtencion(16, '29712252');
 
     expect(resultado.tipo).toBe('derivado');
-    expect(resultado.paciente).toEqual({ dni: '29712252', nombreYApellido: 'Mauro Herrera', mutual: '' });
+    expect(resultado.paciente).toEqual({ codigo: 502, dni: '29712252', nombreYApellido: 'Mauro Herrera', mutual: '' });
   });
 
   it('cierra la sesion del totem cuando el backend rechaza el token', async () => {

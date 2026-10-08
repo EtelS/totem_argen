@@ -4,6 +4,8 @@ export interface Sucursal {
 }
 
 export interface Paciente {
+  /** BDTurnero..Paciente.Codigo, used to register the llamado in Recepcion. */
+  codigo: number;
   dni: string;
   nombreYApellido: string;
   mutual: string;

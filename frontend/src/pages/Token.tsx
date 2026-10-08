@@ -12,7 +12,6 @@ import { useConfirmarTurno } from '../hooks/useConfirmarTurno';
  */
 export function Token() {
   const pendienteToken = useTotemStore((s) => s.pendienteToken);
-  const setPendienteToken = useTotemStore((s) => s.setPendienteToken);
   const navigate = useNavigate();
   const confirmar = useConfirmarTurno();
 
@@ -43,9 +42,9 @@ export function Token() {
     // TODO: validate the token against the mutual's service once it exists.
     setError(null);
     setEnviando(true);
-    // Cleared after confirming: clearing first would trigger the redirect to '/' above.
-    await confirmar(pendienteToken.paciente, pendienteToken.turno);
-    setPendienteToken(null);
+    // pendienteToken is cleared by Confirmacion: clearing it here would trigger the redirect to '/' above.
+    await confirmar(pendienteToken.paciente, pendienteToken.turno, pendienteToken.numero);
+    setEnviando(false);
   }
 
   return (
