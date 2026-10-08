@@ -12,6 +12,7 @@ namespace TotemApi.Models
 
     public class PacienteFila
     {
+        public int Codigo { get; set; }
         public string Dni { get; set; }
         public string NombreYApellido { get; set; }
         public string MutualPaciente { get; set; }

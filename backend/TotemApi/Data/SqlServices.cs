@@ -83,5 +83,20 @@ namespace TotemApi.Data
                 return filas > 0;
             }
         }
+
+        // codigoPaciente is null for an unknown DNI. Returns the llamado number,
+        // or null when the paciente or sucursal do not belong to the cliente.
+        public static int? InsertarLlamado(int cliente, int sucursalId, string dni, int? codigoPaciente)
+        {
+            using (var conn = DbConnection.GetConnection())
+            {
+                return conn.ExecuteScalar<int?>(
+                    "spTotemInsertarLlamado",
+                    new { Cliente = cliente, SucursalId = sucursalId, Dni = dni, CodigoPaciente = codigoPaciente },
+                    commandType: CommandType.StoredProcedure,
+                    commandTimeout: 60
+                );
+            }
+        }
     }
 }

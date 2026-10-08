@@ -14,6 +14,8 @@ namespace TotemApi.Models
 
     public class PacienteAtencion
     {
+        // BDTurnero..Paciente.Codigo, needed to register the llamado in Recepcion.
+        public int Codigo { get; set; }
         public string Dni { get; set; }
         public string NombreYApellido { get; set; }
         public string Mutual { get; set; }

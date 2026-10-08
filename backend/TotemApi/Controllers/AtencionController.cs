@@ -59,5 +59,31 @@ namespace TotemApi.Controllers
                 return InternalServerError(ex);
             }
         }
+
+        [HttpPost]
+        [Route("llamado")]
+        public IHttpActionResult InsertarLlamado([FromBody] LlamadoRequest request)
+        {
+            try
+            {
+                if (request == null || request.PacienteCodigo <= 0 || request.Dni == null || !DniValido.IsMatch(request.Dni))
+                    return BadRequest("Sucursal y Dni son requeridos; PacienteCodigo debe ser positivo si se informa");
+
+                int cliente;
+                if (!int.TryParse(Request.Properties["Cliente"] as string, out cliente))
+                    return Unauthorized();
+
+                var numero = SqlServices.InsertarLlamado(cliente, request.Sucursal, request.Dni, request.PacienteCodigo);
+                if (numero == null)
+                    return NotFound();
+
+                return Ok(new { Numero = numero.Value });
+            }
+            catch (Exception ex)
+            {
+                LogService.Error("Error insertando llamado del DNI " + (request != null ? request.Dni : ""), ex, "AtencionController");
+                return InternalServerError(ex);
+            }
+        }
     }
 }

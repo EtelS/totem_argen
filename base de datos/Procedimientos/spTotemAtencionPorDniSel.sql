@@ -15,7 +15,7 @@
 --                 Si hay filas duplicadas por SucursalId + MutualId se toma
 --                 la más reciente (mismo criterio que spTotemTurnoConfirmarUpd).
 -- ============================================================
--- exec spTotemAtencionPorDniSel 11, 16, '30738807'
+-- exec spTotemAtencionPorDniSel 11, 16, '31056851'
 IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'spTotemAtencionPorDniSel')
     DROP PROCEDURE [dbo].[spTotemAtencionPorDniSel]
 GO
@@ -56,6 +56,7 @@ BEGIN
 
     -- 1) Paciente: se prioriza el registro que tiene turno hoy, luego el más reciente.
     SELECT TOP 1
+		pa.Codigo,
         pa.Dni,
         pa.NombreYApellido,
         pa.MutualPaciente

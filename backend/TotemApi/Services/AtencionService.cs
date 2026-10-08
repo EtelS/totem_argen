@@ -14,6 +14,7 @@ namespace TotemApi.Services
 
             var paciente = new PacienteAtencion
             {
+                Codigo = atencion.Paciente.Codigo,
                 Dni = atencion.Paciente.Dni,
                 NombreYApellido = atencion.Paciente.NombreYApellido,
                 Mutual = atencion.Paciente.MutualPaciente
