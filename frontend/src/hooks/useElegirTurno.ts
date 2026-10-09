@@ -29,8 +29,7 @@ export function useElegirTurno() {
     }
 
     if (!turno.autogestion) {
-      setConfirmacion({ tipo: 'derivado', numero, paciente });
-      
+      setConfirmacion({ tipo: 'derivado', numero, paciente, turno });
       navigate('/confirmacion');
       return;
     }

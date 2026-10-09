@@ -3,7 +3,7 @@ import { Paciente, Turno } from '../api/types';
 
 export type ConfirmacionData =
   | { tipo: 'turno'; numero: number; paciente: Paciente; turno: Turno }
-  | { tipo: 'derivado'; numero: number; paciente?: Paciente };
+  | { tipo: 'derivado'; numero: number; paciente?: Paciente; turno?: Turno };
 
 export interface PendienteToken {
   paciente: Paciente;

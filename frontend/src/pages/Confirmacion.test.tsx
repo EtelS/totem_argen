@@ -1,12 +1,16 @@
-import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Confirmacion } from './Confirmacion';
 import { useTotemStore } from '../store/useTotemStore';
 
 describe('Confirmacion', () => {
   beforeEach(() => {
     useTotemStore.setState({ dni: null, confirmacion: null });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('limpia la seleccion de turno y el token pendiente al mostrarse', () => {
@@ -94,5 +98,57 @@ describe('Confirmacion', () => {
     expect(screen.getByText('Numero asignado')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText(/atendido\/a en Recepcion/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Prestador:/)).not.toBeInTheDocument();
+  });
+
+  it('muestra los datos del turno elegido como un turno confirmado cuando se deriva a Recepcion', () => {
+    useTotemStore.setState({
+      dni: '29712252',
+      confirmacion: {
+        tipo: 'derivado',
+        numero: 5,
+        paciente: { codigo: 502, dni: '29712252', nombreYApellido: 'GUILLERMO DANIEL ROMO', mutual: 'particular' },
+        turno: { codigo: 3, fecha: '09/10/2026', hora: '08:00', prestador: 'Herrera Mauro', mutual: 'particular', autogestion: false, pideCodigoSeguridad: false },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <Confirmacion />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('GUILLERMO DANIEL ROMO')).toBeInTheDocument();
+    expect(screen.getByText('Prestador: Herrera Mauro')).toBeInTheDocument();
+    expect(screen.getByText('Fecha: 09/10/2026')).toBeInTheDocument();
+    expect(screen.getByText('Hora: 08:00')).toBeInTheDocument();
+    expect(screen.getByText('Mutual: particular')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+  });
+
+  it('vuelve al inicio y limpia los datos despues de 7 segundos', () => {
+    vi.useFakeTimers();
+    useTotemStore.setState({ dni: '11111111', confirmacion: { tipo: 'derivado', numero: 2 } });
+
+    render(
+      <MemoryRouter initialEntries={['/confirmacion']}>
+        <Routes>
+          <Route path="/confirmacion" element={<Confirmacion />} />
+          <Route path="/" element={<p>pantalla bienvenida</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(6999);
+    });
+    expect(screen.getByText('Numero asignado')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByText('pantalla bienvenida')).toBeInTheDocument();
+    expect(useTotemStore.getState().confirmacion).toBeNull();
+    expect(useTotemStore.getState().dni).toBeNull();
   });
 });

@@ -81,7 +81,7 @@ describe('SeleccionarTurno', () => {
     fireEvent.click(screen.getByRole('button', { name: /10:00 - Diaz Carla/ }));
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 7, paciente: PACIENTE });
+    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 7, paciente: PACIENTE, turno: TURNO_PARTICULAR });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
