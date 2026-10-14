@@ -28,7 +28,7 @@ export function SeleccionarSucursal() {
       return;
     }
     setSucursal(sucursal);
-    navigate('/');
+    navigate('/seleccionar-totem');
   }
 
   return (

@@ -12,14 +12,15 @@ import { useAuthStore } from '../store/useAuthStore';
 export function useRegistrarLlamado() {
   const navigate = useNavigate();
   const sucursal = useAuthStore((s) => s.sucursal);
+  const totemRecepcion = useAuthStore((s) => s.totemRecepcion);
 
   return async (dni: string, pacienteCodigo: number | null): Promise<number | null> => {
-    if (!sucursal) {
+    if (!sucursal || !totemRecepcion) {
       return null;
     }
 
     try {
-      return await insertarLlamado(sucursal.suc_id, dni, pacienteCodigo);
+      return await insertarLlamado(sucursal.suc_id, totemRecepcion.tot_id, dni, pacienteCodigo);
     } catch (e) {
       // A 401 already closed the session; RequireSesion sends the totem back to login.
       if (!(e instanceof ApiError && e.status === 401)) {

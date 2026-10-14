@@ -48,7 +48,12 @@ function ingresarDni(dni: string) {
 
 describe('Bienvenida', () => {
   beforeEach(() => {
-    useAuthStore.setState({ usuario: 'eteltotem', token: 'jwt-123', sucursal: { suc_id: 16, suc_nom: 'clinicademo' } });
+    useAuthStore.setState({
+      usuario: 'eteltotem',
+      token: 'jwt-123',
+      sucursal: { suc_id: 16, suc_nom: 'clinicademo' },
+      totemRecepcion: { tot_id: 3, tot_nom: 'Totem entrada' },
+    });
     useTotemStore.setState({ dni: null, seleccionTurno: null, pendienteToken: null, confirmacion: null });
   });
 
@@ -79,7 +84,7 @@ describe('Bienvenida', () => {
     expect(fetchMock.mock.calls[0][0]).toBe(`${API_BASE_URL}/api/atencion?sucursal=16&dni=30738807`);
     const [urlLlamado, initLlamado] = fetchMock.mock.calls[1];
     expect(urlLlamado).toBe(`${API_BASE_URL}/api/atencion/llamado`);
-    expect(JSON.parse(initLlamado.body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501 });
+    expect(JSON.parse(initLlamado.body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501, TotemRecepcionId: 3 });
     const [urlConfirmar, initConfirmar] = fetchMock.mock.calls[2];
     expect(urlConfirmar).toBe(`${API_BASE_URL}/api/atencion/confirmar`);
     expect(JSON.parse(initConfirmar.body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 11 });
@@ -177,7 +182,7 @@ describe('Bienvenida', () => {
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
     const [urlLlamado, initLlamado] = fetchMock.mock.calls[1];
     expect(urlLlamado).toBe(`${API_BASE_URL}/api/atencion/llamado`);
-    expect(JSON.parse(initLlamado.body)).toEqual({ Sucursal: 16, Dni: '11111111', PacienteCodigo: null });
+    expect(JSON.parse(initLlamado.body)).toEqual({ Sucursal: 16, Dni: '11111111', PacienteCodigo: null, TotemRecepcionId: 3 });
     expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 7, paciente: undefined });
   });
 
@@ -191,7 +196,7 @@ describe('Bienvenida', () => {
     ingresarDni('30738807');
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501 });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501, TotemRecepcionId: 3 });
     expect(useTotemStore.getState().confirmacion).toMatchObject({ tipo: 'derivado', numero: 8, paciente: { codigo: 501 } });
   });
 

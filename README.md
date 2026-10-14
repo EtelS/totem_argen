@@ -57,6 +57,7 @@ Las llamadas viven en `frontend/src/api/`:
   llamada autenticada cierra la sesion y el totem vuelve al login.
 - `auth.ts`: `login` y `refrescarToken`.
 - `atencion.ts`: `buscarAtencion(sucursalId, dni)`.
+- `totemsRecepcion.ts`: `buscarTotemsRecepcion(sucursalId)`.
 
 La decision turno/derivado la toma el backend (`AtencionService`). Al
 arrancar, el totem renueva su token (`api/auth/refresh`), asi que se
@@ -64,14 +65,17 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
 
 ## 4. Flujo de la aplicacion
 
-1. **Login y sucursal** (una sola vez por totem): al abrir la URL sin una
+1. **Login, sucursal y totem** (una sola vez por totem): al abrir la URL sin una
    sesion guardada, se pide usuario y contrasena (`/login`). Si son
    validos, se resuelve la sucursal a partir del usuario:
-   - Si el usuario tiene una sola sucursal, se autoselecciona y arranca
-     directo en la pantalla de bienvenida (`/`).
+   - Si el usuario tiene una sola sucursal, se autoselecciona.
    - Si tiene mas de una, se pide elegirla (`/seleccionar-sucursal`)
      mostrando el `suc_nom` de cada una.
-   La sesion (usuario + token + sucursal) queda guardada en `localStorage`, asi que
+   Con la sucursal definida se elige el totem de recepcion
+   (`/seleccionar-totem`, `spTotemTotemRecepcionSel`): si la sucursal tiene
+   un solo totem se autoselecciona; despues arranca en la pantalla de
+   bienvenida (`/`). El totem elegido se envia en cada llamado.
+   La sesion (usuario + token + sucursal + totem) queda guardada en `localStorage`, asi que
    en una recarga o reinicio del totem ya configurado no se vuelve a pedir
    login.
 2. El paciente ingresa su DNI con el teclado numerico (`/`).
@@ -150,7 +154,8 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | POST | `api/auth/refresh` | JWT | Renueva el token |
 | GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente: { Codigo, Dni, NombreYApellido, Mutual }, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
 | POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente, no esta pendiente o su mutual no tiene `TotemAutogestion = 1` |
-| POST | `api/atencion/llamado` | JWT | `{ Sucursal, Dni, PacienteCodigo }` → `{ Numero }`: registra en `TurnoTotemRecepcion` con el numero de llamado del dia (correlativo por sucursal). `PacienteCodigo` null si el DNI no existe. 404 si el paciente o la sucursal no son del cliente |
+| GET | `api/totems-recepcion?sucursal={id}` | JWT | `[{ Codigo, Nombre }]`: totems de recepcion de la sucursal (`BDTurnero..TotemRecepcion`) |
+| POST | `api/atencion/llamado` | JWT | `{ Sucursal, Dni, PacienteCodigo, TotemRecepcionId }` → `{ Numero }`: registra en `TurnoTotemRecepcion` con el numero de llamado del dia (correlativo por sucursal). `PacienteCodigo` null si el DNI no existe. 404 si el paciente o la sucursal no son del cliente |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por
 defecto (`JwtExpirationMinutes`), porque el totem queda logueado.
@@ -162,7 +167,8 @@ Los scripts estan en `base de datos/` (misma estructura que
 
 - `Procedimientos/`: `spTotemAuthUsuarioSel`, `spTotemUsuarioPorCodigoSel`,
   `spTotemSucursalesSel`, `spTotemAtencionPorDniSel`,
-  `spTotemTurnoConfirmarUpd`, `spTotemInsertarLlamado`.
+  `spTotemTurnoConfirmarUpd`, `spTotemInsertarLlamado`,
+  `spTotemTotemRecepcionSel`.
 - `Diagnostico/01_diagnostico_columnas_totem.sql`: ejecutar antes de impactar
   los SPs para confirmar las columnas asumidas.
 
@@ -186,14 +192,14 @@ totem_argen/
 ├── base de datos/     # Procedimientos, Diagnostico
 └── frontend/
     └── src/
-        ├── pages/         # Login, SeleccionarSucursal, Bienvenida,
+        ├── pages/         # Login, SeleccionarSucursal, SeleccionarTotem, Bienvenida,
         │                  # SeleccionarTurno, Token, Confirmacion, Ayuda,
         │                  # ErrorPage
         ├── hooks/         # useElegirTurno
         ├── components/    # LayoutKiosco, RequireSesion, TecladoNumerico,
         │                  # TecladoAlfanumerico, BotonAyuda
         ├── store/         # useTotemStore, useAuthStore (zustand)
-        └── api/           # client (fetch + JWT), auth, atencion
+        └── api/           # client (fetch + JWT), auth, atencion, totemsRecepcion
 ```
 
 ## 9. Pendiente / fuera de alcance

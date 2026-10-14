@@ -8,8 +8,9 @@ type CampoActivo = 'usuario' | 'contrasena';
 
 /**
  * Pantalla de login (`/login`), primer paso al configurar el totem en una
- * clinica: usuario + contrasena. La sucursal se resuelve despues, segun la
- * respuesta de `login` (ver Bienvenida/App para el resto del flujo).
+ * clinica: usuario + contrasena. La sucursal y el totem de recepcion se
+ * resuelven despues, segun la respuesta de `login` (ver Bienvenida/App para
+ * el resto del flujo).
  */
 export function Login() {
   const [usuario, setUsuario] = useState('');
@@ -20,13 +21,14 @@ export function Login() {
 
   const navigate = useNavigate();
   const sesionActiva = useAuthStore((s) => Boolean(s.token && s.sucursal));
+  const totemElegido = useAuthStore((s) => Boolean(s.totemRecepcion));
   const setCredencialesValidadas = useAuthStore((s) => s.setCredencialesValidadas);
 
   useEffect(() => {
     if (sesionActiva) {
-      navigate('/', { replace: true });
+      navigate(totemElegido ? '/' : '/seleccionar-totem', { replace: true });
     }
-  }, [sesionActiva, navigate]);
+  }, [sesionActiva, totemElegido, navigate]);
 
   if (sesionActiva) {
     return null;
@@ -60,7 +62,7 @@ export function Login() {
       setCredencialesValidadas(resultado.usuario, resultado.token, resultado.sucursales);
 
       if (resultado.sucursales.length === 1) {
-        navigate('/');
+        navigate('/seleccionar-totem');
       } else {
         navigate('/seleccionar-sucursal');
       }

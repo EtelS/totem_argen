@@ -38,7 +38,12 @@ function renderSeleccionarTurno() {
 
 describe('SeleccionarTurno', () => {
   beforeEach(() => {
-    useAuthStore.setState({ usuario: 'eteltotem', token: 'jwt-123', sucursal: { suc_id: 16, suc_nom: 'clinicademo' } });
+    useAuthStore.setState({
+      usuario: 'eteltotem',
+      token: 'jwt-123',
+      sucursal: { suc_id: 16, suc_nom: 'clinicademo' },
+      totemRecepcion: { tot_id: 3, tot_nom: 'Totem entrada' },
+    });
     useTotemStore.setState({
       dni: '30738807',
       seleccionTurno: { paciente: PACIENTE, turnos: [TURNO_PARTICULAR, TURNO_MUTUAL] },
@@ -67,7 +72,7 @@ describe('SeleccionarTurno', () => {
     fireEvent.click(screen.getByRole('button', { name: /15:00 - Romo Guillermo/ }));
 
     expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501 });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', PacienteCodigo: 501, TotemRecepcionId: 3 });
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ Sucursal: 16, Dni: '30738807', TurnoCodigo: 11 });
     expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'turno', numero: 7, paciente: PACIENTE, turno: TURNO_MUTUAL });
     // Cleared by Confirmacion on mount: clearing it here would trigger this page's redirect to '/'.

@@ -3,6 +3,12 @@ export interface Sucursal {
   suc_nom: string;
 }
 
+export interface TotemRecepcion {
+  /** BDTurnero..TotemRecepcion.Codigo, sent when registering the llamado. */
+  tot_id: number;
+  tot_nom: string;
+}
+
 export interface Paciente {
   /** BDTurnero..Paciente.Codigo, used to register the llamado in Recepcion. */
   codigo: number;

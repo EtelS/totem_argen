@@ -6,7 +6,12 @@ import { mockFetch, respuestaJson } from '../tests/fetchMock';
 
 describe('buscarAtencion', () => {
   beforeEach(() => {
-    useAuthStore.setState({ usuario: 'eteltotem', token: 'jwt-123', sucursal: { suc_id: 16, suc_nom: 'clinicademo' } });
+    useAuthStore.setState({
+      usuario: 'eteltotem',
+      token: 'jwt-123',
+      sucursal: { suc_id: 16, suc_nom: 'clinicademo' },
+      totemRecepcion: { tot_id: 3, tot_nom: 'Totem entrada' },
+    });
   });
 
   afterEach(() => {

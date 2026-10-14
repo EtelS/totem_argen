@@ -4,17 +4,19 @@ import { useAuthStore } from '../store/useAuthStore';
 
 /**
  * Protege las pantallas del flujo de paciente: si el totem todavia no tiene
- * una sesion (token + sucursal) configurada, redirige al login.
+ * una sesion (token + sucursal + totem de recepcion) configurada, redirige al
+ * paso que falta: el login, o la eleccion del totem si ya tiene sucursal.
  */
 export function RequireSesion({ children }: PropsWithChildren) {
-  const sesionActiva = useAuthStore((s) => Boolean(s.token && s.sucursal));
+  const sucursalElegida = useAuthStore((s) => Boolean(s.token && s.sucursal));
+  const sesionActiva = useAuthStore((s) => Boolean(s.token && s.sucursal && s.totemRecepcion));
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!sesionActiva) {
-      navigate('/login', { replace: true });
+      navigate(sucursalElegida ? '/seleccionar-totem' : '/login', { replace: true });
     }
-  }, [sesionActiva, navigate]);
+  }, [sesionActiva, sucursalElegida, navigate]);
 
   if (!sesionActiva) {
     return null;

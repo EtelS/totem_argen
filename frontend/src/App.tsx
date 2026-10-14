@@ -11,6 +11,7 @@ import { ErrorPage } from './pages/ErrorPage';
 import { Ayuda } from './pages/Ayuda';
 import { Login } from './pages/Login';
 import { SeleccionarSucursal } from './pages/SeleccionarSucursal';
+import { SeleccionarTotem } from './pages/SeleccionarTotem';
 import { SeleccionarTurno } from './pages/SeleccionarTurno';
 
 export default function App() {
@@ -42,6 +43,14 @@ export default function App() {
         element={
           <LayoutKiosco>
             <SeleccionarSucursal />
+          </LayoutKiosco>
+        }
+      />
+      <Route
+        path="/seleccionar-totem"
+        element={
+          <LayoutKiosco>
+            <SeleccionarTotem />
           </LayoutKiosco>
         }
       />
