@@ -154,7 +154,7 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | POST | `api/auth/refresh` | JWT | Renueva el token |
 | GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente: { Codigo, Dni, NombreYApellido, Mutual }, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
 | POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente, no esta pendiente o su mutual no tiene `TotemAutogestion = 1` |
-| GET | `api/totems-recepcion?sucursal={id}` | JWT | `[{ Codigo, Nombre }]`: totems de recepcion de la sucursal (`BDTurnero..TotemRecepcion`) |
+| GET | `api/totems-recepcion?sucursal={id}` | JWT | `[{ Codigo, Nombre }]`: totems de recepcion de la sucursal (`BDTurnero..TotemRecepcion`); lista vacia si la sucursal no es del cliente |
 | POST | `api/atencion/llamado` | JWT | `{ Sucursal, Dni, PacienteCodigo, TotemRecepcionId }` → `{ Numero }`: registra en `TurnoTotemRecepcion` con el numero de llamado del dia (correlativo por sucursal). `PacienteCodigo` null si el DNI no existe. 404 si el paciente o la sucursal no son del cliente |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por

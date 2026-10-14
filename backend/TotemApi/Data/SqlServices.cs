@@ -53,13 +53,13 @@ namespace TotemApi.Data
 
         // ==================== TOTEMS DE RECEPCION ====================
 
-        public static List<TotemRecepcion> TraerTotemsRecepcion(int sucursalId)
+        public static List<TotemRecepcion> TraerTotemsRecepcion(int cliente, int sucursalId)
         {
             using (var conn = DbConnection.GetConnection())
             {
                 return conn.Query<TotemRecepcion>(
                     "spTotemTotemRecepcionSel",
-                    new { Sucursal = sucursalId },
+                    new { Cliente = cliente, Sucursal = sucursalId },
                     commandType: CommandType.StoredProcedure,
                     commandTimeout: 60
                 ).ToList();

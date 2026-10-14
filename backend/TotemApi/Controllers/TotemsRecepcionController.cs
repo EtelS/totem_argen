@@ -17,7 +17,11 @@ namespace TotemApi.Controllers
                 if (sucursal <= 0)
                     return BadRequest("Sucursal es requerida");
 
-                return Ok(SqlServices.TraerTotemsRecepcion(sucursal));
+                int cliente;
+                if (!int.TryParse(Request.Properties["Cliente"] as string, out cliente))
+                    return Unauthorized();
+
+                return Ok(SqlServices.TraerTotemsRecepcion(cliente, sucursal));
             }
             catch (Exception ex)
             {
