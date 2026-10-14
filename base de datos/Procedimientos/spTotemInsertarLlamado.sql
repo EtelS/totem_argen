@@ -20,7 +20,8 @@ CREATE PROCEDURE [dbo].[spTotemInsertarLlamado]
     @Cliente INT,
     @SucursalId INT,
     @Dni VARCHAR(10),
-    @CodigoPaciente INT = NULL
+    @CodigoPaciente INT = NULL,
+	@TotemRecepcionId INT = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -54,8 +55,10 @@ BEGIN
       AND ttr.FechaRegistro >= @Hoy
       AND ttr.FechaRegistro < @Manana;
 
-    INSERT BDTurnero..TurnoTotemRecepcion (NumeroIdentificadorDiario, PacienteId, FechaRegistro, FechaLlamado, EstadoTurnoTotemRecepcionId, CategoriaTotemRecepcionId, BoxRecepcionId, TotemRecepcionId, SucursalId, LogFecha)
-    VALUES (@NumeroLlamado, @CodigoPaciente, GETDATE(), NULL, 1, 3, NULL, 1, @SucursalId, GETDATE());
+    INSERT BDTurnero..TurnoTotemRecepcion (NumeroIdentificadorDiario, PacienteId, FechaRegistro, FechaLlamado, 
+		EstadoTurnoTotemRecepcionId, CategoriaTotemRecepcionId, BoxRecepcionId, TotemRecepcionId, SucursalId, LogFecha)
+    VALUES (@NumeroLlamado, @CodigoPaciente, GETDATE(), NULL, 
+		1, 3, NULL, @TotemRecepcionId, @SucursalId, GETDATE());
 
     COMMIT;
 

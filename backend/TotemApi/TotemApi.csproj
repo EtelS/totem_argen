@@ -75,6 +75,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AtencionController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Controllers\TotemsRecepcionController.cs" />
     <Compile Include="Data\DbConnection.cs" />
     <Compile Include="Data\SqlServices.cs" />
     <Compile Include="Global.asax.cs">
@@ -90,6 +91,7 @@
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\LoginResponse.cs" />
     <Compile Include="Models\Sucursal.cs" />
+    <Compile Include="Models\TotemRecepcion.cs" />
     <Compile Include="Models\Usuario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AtencionService.cs" />

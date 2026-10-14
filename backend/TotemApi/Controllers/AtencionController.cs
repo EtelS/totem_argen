@@ -66,14 +66,14 @@ namespace TotemApi.Controllers
         {
             try
             {
-                if (request == null || request.PacienteCodigo <= 0 || request.Dni == null || !DniValido.IsMatch(request.Dni))
-                    return BadRequest("Sucursal y Dni son requeridos; PacienteCodigo debe ser positivo si se informa");
+                if (request == null || request.PacienteCodigo <= 0 || request.TotemRecepcionId <= 0 || request.Dni == null || !DniValido.IsMatch(request.Dni))
+                    return BadRequest("Sucursal y Dni son requeridos; PacienteCodigo y TotemRecepcionId deben ser positivos si se informan");
 
                 int cliente;
                 if (!int.TryParse(Request.Properties["Cliente"] as string, out cliente))
                     return Unauthorized();
 
-                var numero = SqlServices.InsertarLlamado(cliente, request.Sucursal, request.Dni, request.PacienteCodigo);
+                var numero = SqlServices.InsertarLlamado(cliente, request.Sucursal, request.Dni, request.PacienteCodigo, request.TotemRecepcionId);
                 if (numero == null)
                     return NotFound();
 

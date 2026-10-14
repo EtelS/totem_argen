@@ -51,6 +51,21 @@ namespace TotemApi.Data
             }
         }
 
+        // ==================== TOTEMS DE RECEPCION ====================
+
+        public static List<TotemRecepcion> TraerTotemsRecepcion(int sucursalId)
+        {
+            using (var conn = DbConnection.GetConnection())
+            {
+                return conn.Query<TotemRecepcion>(
+                    "spTotemTotemRecepcionSel",
+                    new { Sucursal = sucursalId },
+                    commandType: CommandType.StoredProcedure,
+                    commandTimeout: 60
+                ).ToList();
+            }
+        }
+
         // ==================== ATENCION ====================
 
         public static AtencionPorDni TraerAtencionPorDni(int cliente, int sucursalId, string dni)
@@ -86,13 +101,13 @@ namespace TotemApi.Data
 
         // codigoPaciente is null for an unknown DNI. Returns the llamado number,
         // or null when the paciente or sucursal do not belong to the cliente.
-        public static int? InsertarLlamado(int cliente, int sucursalId, string dni, int? codigoPaciente)
+        public static int? InsertarLlamado(int cliente, int sucursalId, string dni, int? codigoPaciente, int? totemRecepcionId)
         {
             using (var conn = DbConnection.GetConnection())
             {
                 return conn.ExecuteScalar<int?>(
                     "spTotemInsertarLlamado",
-                    new { Cliente = cliente, SucursalId = sucursalId, Dni = dni, CodigoPaciente = codigoPaciente },
+                    new { Cliente = cliente, SucursalId = sucursalId, Dni = dni, CodigoPaciente = codigoPaciente, TotemRecepcionId = totemRecepcionId },
                     commandType: CommandType.StoredProcedure,
                     commandTimeout: 60
                 );
