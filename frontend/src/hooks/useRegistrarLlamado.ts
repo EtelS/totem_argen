@@ -5,8 +5,8 @@ import { useAuthStore } from '../store/useAuthStore';
 
 /**
  * Registra en la cola de Recepcion a quien pasa por el totem y devuelve el
- * numero de llamado que genera el backend. `pacienteCodigo` es null cuando
- * el DNI no existe. Si el backend falla devuelve null y lleva a `/error`,
+ * numero de llamado que genera el backend. Un DNI que no existia ya fue
+ * dado de alta en `/registrar-paciente`, asi que llega con su codigo. Si el backend falla devuelve null y lleva a `/error`,
  * asi el paciente no ve un numero que no quedo registrado.
  */
 export function useRegistrarLlamado() {

@@ -99,6 +99,21 @@ namespace TotemApi.Data
             }
         }
 
+        // Creates the paciente for a DNI that is not in the database. Returns its
+        // new codigo (PacienteCodigo), or null when the SP returns no row.
+        public static int? InsertarPaciente(int cliente, int sucursalId, string dni, string nombre)
+        {
+            using (var conn = DbConnection.GetConnection())
+            {
+                return conn.ExecuteScalar<int?>(
+                    "spTotemInsertarPaciente",
+                    new { Cliente = cliente, SucursalId = sucursalId, Dni = dni, Nombre = nombre },
+                    commandType: CommandType.StoredProcedure,
+                    commandTimeout: 60
+                );
+            }
+        }
+
         // codigoPaciente is null for an unknown DNI; in that case the DNI travels as
         // Observacion so Recepcion can see it. Returns the llamado number,
         // or null when the paciente or sucursal do not belong to the cliente.

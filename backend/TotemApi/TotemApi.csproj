@@ -87,6 +87,7 @@
     <Compile Include="Models\AtencionPorDni.cs" />
     <Compile Include="Models\AtencionResponse.cs" />
     <Compile Include="Models\ConfirmarTurnoRequest.cs" />
+    <Compile Include="Models\InsertarPacienteRequest.cs" />
     <Compile Include="Models\LlamadoRequest.cs" />
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\LoginResponse.cs" />

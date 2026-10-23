@@ -12,8 +12,9 @@ import { useRegistrarLlamado } from '../hooks/useRegistrarLlamado';
 /**
  * Pantalla de bienvenida (`/`). Busca al paciente por DNI en el backend:
  * con varios turnos hoy el paciente elige cual confirmar
- * (`/seleccionar-turno`); con uno solo se resuelve directo. Sin turnos o sin
- * paciente, se registra el llamado y se deriva a Recepcion con su numero.
+ * (`/seleccionar-turno`); con uno solo se resuelve directo. Sin turnos, se
+ * registra el llamado y se deriva a Recepcion con su numero. Si el DNI no
+ * existe, se pide el nombre para crear el paciente (`/registrar-paciente`).
  */
 export function Bienvenida() {
   const [dni, setDni] = useState('');
@@ -53,12 +54,19 @@ export function Bienvenida() {
     }
 
     if (resultado.tipo === 'derivado') {
-      const numero = await registrarLlamado(dni, resultado.paciente?.codigo ?? null);
+      const { paciente } = resultado;
+      if (!paciente) {
+        setCargando(false);
+        navigate('/registrar-paciente');
+        return;
+      }
+
+      const numero = await registrarLlamado(dni, paciente.codigo);
       setCargando(false);
       if (numero === null) {
         return;
       }
-      setConfirmacion({ tipo: 'derivado', numero, paciente: resultado.paciente });
+      setConfirmacion({ tipo: 'derivado', numero, paciente });
       navigate('/confirmacion');
       return;
     }

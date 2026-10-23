@@ -100,12 +100,15 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
      prestador, fecha, hora y mutual (`/confirmacion`).
    - En ambos casos la confirmacion muestra el numero de llamado y permite
      imprimir el ticket.
-4. Si la mutual del turno no tiene autogestion, el paciente no tiene turno para el dia de hoy, o no se
-   encuentra, se registra el llamado en Recepcion (`spTotemInsertarLlamado`,
-   con `PacienteId` NULL y el DNI en `Observacion` si el DNI no existe) y se lo deriva a Recepcion con
-   ese numero (`/confirmacion`). Si el DNI pertenece a un
-   paciente conocido (aunque sea particular o sin turno hoy), se muestra su
-   nombre en la pantalla de derivacion.
+4. Si la mutual del turno no tiene autogestion o el paciente no tiene turno
+   para el dia de hoy, se registra el llamado en Recepcion
+   (`spTotemInsertarLlamado`) y se lo deriva a Recepcion con ese numero
+   (`/confirmacion`), mostrando su nombre en la pantalla de derivacion.
+   - Si el DNI no existe en la base, se pide el nombre y apellido
+     (`/registrar-paciente`, obligatorio; "Volver" regresa al inicio). Se crea
+     el paciente (`spTotemInsertarPaciente`) y se registra el llamado con su
+     codigo. Si el llamado igual llegara sin paciente, el DNI se guarda en
+     `Observacion`.
 5. El boton "Necesito ayuda" (visible en todas las pantallas del flujo de
    paciente) lleva a `/ayuda`.
 
@@ -114,8 +117,8 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
 Requiere los SPs impactados y un usuario de `BdCentral..Usuario` con
 `Sistema = 45`. Con un paciente que tenga turno hoy en la sucursal del
 totem y mutual con `TotemAutogestion = 1` en `SucursalPorMutual` se confirma el turno; con varios
-turnos hoy se pide elegir uno; cualquier otro DNI de 7-8 digitos recibe
-numero de llamado (se puede verificar en `BDTurnero..TurnoTotemRecepcion`).
+turnos hoy se pide elegir uno; un DNI inexistente pide el nombre y crea el
+paciente; cualquier otro DNI de 7-8 digitos recibe numero de llamado (se puede verificar en `BDTurnero..TurnoTotemRecepcion`).
 
 ## 6. Tests
 
@@ -155,6 +158,7 @@ IIS: Application Pool con .NET CLR v4.0, pipeline integrado.
 | GET | `api/atencion?sucursal={id}&dni={dni}` | JWT | `{ Tipo: "turnos" \| "derivado", Paciente: { Codigo, Dni, NombreYApellido, Mutual }, Turnos: [{ Codigo, Fecha, Hora, Prestador, Mutual, Autogestion, PideCodigoSeguridad }] }` (turnos de hoy en la sucursal pendientes, `Estado = 1`) |
 | POST | `api/atencion/confirmar` | JWT | `{ Sucursal, Dni, TurnoCodigo }` → marca el turno con `Estado = 2`. 404 si no es de hoy, del paciente, no esta pendiente o su mutual no tiene `TotemAutogestion = 1` |
 | GET | `api/totems-recepcion?sucursal={id}` | JWT | `[{ Codigo, Nombre }]`: totems de recepcion de la sucursal (`BDTurnero..TotemRecepcion`); lista vacia si la sucursal no es del cliente |
+| POST | `api/atencion/paciente` | JWT | `{ Sucursal, Dni, Nombre }` → `{ PacienteCodigo }`: crea el paciente de un DNI que no existe (`spTotemInsertarPaciente`). `Nombre` de 3 a 60 letras, digitos o espacios; se guarda en mayusculas |
 | POST | `api/atencion/llamado` | JWT | `{ Sucursal, Dni, PacienteCodigo, TotemRecepcionId }` → `{ Numero }`: registra en `TurnoTotemRecepcion` con el numero de llamado del dia (correlativo por sucursal). `PacienteCodigo` null si el DNI no existe. 404 si el paciente o la sucursal no son del cliente |
 
 El cliente se toma del JWT, nunca de la query. El token dura 30 dias por
@@ -168,7 +172,7 @@ Los scripts estan en `base de datos/` (misma estructura que
 - `Procedimientos/`: `spTotemAuthUsuarioSel`, `spTotemUsuarioPorCodigoSel`,
   `spTotemSucursalesSel`, `spTotemAtencionPorDniSel`,
   `spTotemTurnoConfirmarUpd`, `spTotemInsertarLlamado`,
-  `spTotemTotemRecepcionSel`.
+  `spTotemTotemRecepcionSel`, `spTotemInsertarPaciente`.
 - `Diagnostico/01_diagnostico_columnas_totem.sql`: ejecutar antes de impactar
   los SPs para confirmar las columnas asumidas.
 

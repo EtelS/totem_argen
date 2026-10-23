@@ -45,6 +45,13 @@ describe('Login', () => {
     expect(screen.getByRole('button', { name: 'Ingresar' })).toBeInTheDocument();
   });
 
+  it('no ofrece la tecla espacio en el teclado del login', () => {
+    renderLogin();
+
+    expect(screen.getByRole('button', { name: 'Letra o digito a' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Espacio' })).not.toBeInTheDocument();
+  });
+
   it('muestra error con credenciales invalidas', async () => {
     mockFetch(new Response(null, { status: 401 }));
     renderLogin();

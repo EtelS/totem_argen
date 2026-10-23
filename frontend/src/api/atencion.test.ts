@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { API_BASE_URL } from '../config';
-import { buscarAtencion } from './atencion';
+import { buscarAtencion, insertarPaciente } from './atencion';
 import { useAuthStore } from '../store/useAuthStore';
 import { mockFetch, respuestaJson } from '../tests/fetchMock';
 
@@ -72,5 +72,33 @@ describe('buscarAtencion', () => {
     await expect(buscarAtencion(16, '30738807')).rejects.toMatchObject({ status: 401 });
     expect(useAuthStore.getState().token).toBeNull();
     expect(useAuthStore.getState().sucursal).toBeNull();
+  });
+});
+
+describe('insertarPaciente', () => {
+  beforeEach(() => {
+    useAuthStore.setState({
+      usuario: 'eteltotem',
+      token: 'jwt-123',
+      sucursal: { suc_id: 16, suc_nom: 'clinicademo' },
+      totemRecepcion: { tot_id: 3, tot_nom: 'Totem entrada' },
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('envia sucursal, dni y nombre, y devuelve el codigo del paciente creado', async () => {
+    const fetchMock = mockFetch(respuestaJson(200, { PacienteCodigo: 12843800 }));
+
+    const codigo = await insertarPaciente(16, '11111111', 'JUAN PEREZ');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${API_BASE_URL}/api/atencion/paciente`);
+    expect(init.method).toBe('POST');
+    expect(init.headers.Authorization).toBe('Bearer jwt-123');
+    expect(JSON.parse(init.body)).toEqual({ Sucursal: 16, Dni: '11111111', Nombre: 'JUAN PEREZ' });
+    expect(codigo).toBe(12843800);
   });
 });

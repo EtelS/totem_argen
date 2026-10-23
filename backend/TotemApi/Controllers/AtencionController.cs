@@ -11,6 +11,7 @@ namespace TotemApi.Controllers
     public class AtencionController : ApiController
     {
         private static readonly Regex DniValido = new Regex(@"^\d{7,8}$");
+        private static readonly Regex NombreValido = new Regex(@"^[\p{L}\d ]{3,60}$");
 
         [HttpGet]
         [Route("")]
@@ -56,6 +57,33 @@ namespace TotemApi.Controllers
             catch (Exception ex)
             {
                 LogService.Error("Error confirmando turno " + (request != null ? request.TurnoCodigo : 0), ex, "AtencionController");
+                return InternalServerError(ex);
+            }
+        }
+
+        [HttpPost]
+        [Route("paciente")]
+        public IHttpActionResult InsertarPaciente([FromBody] InsertarPacienteRequest request)
+        {
+            try
+            {
+                var nombre = request != null && request.Nombre != null ? Regex.Replace(request.Nombre.Trim(), @"\s+", " ") : null;
+                if (request == null || request.Dni == null || !DniValido.IsMatch(request.Dni) || nombre == null || !NombreValido.IsMatch(nombre))
+                    return BadRequest("Sucursal, Dni y Nombre son requeridos; Nombre debe tener entre 3 y 60 letras, digitos o espacios");
+
+                int cliente;
+                if (!int.TryParse(Request.Properties["Cliente"] as string, out cliente))
+                    return Unauthorized();
+
+                var codigo = SqlServices.InsertarPaciente(cliente, request.Sucursal, request.Dni, nombre.ToUpperInvariant());
+                if (codigo == null)
+                    throw new InvalidOperationException("spTotemInsertarPaciente no devolvio el PacienteCodigo");
+
+                return Ok(new { PacienteCodigo = codigo.Value });
+            }
+            catch (Exception ex)
+            {
+                LogService.Error("Error insertando paciente del DNI " + (request != null ? request.Dni : ""), ex, "AtencionController");
                 return InternalServerError(ex);
             }
         }

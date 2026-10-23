@@ -33,6 +33,7 @@ function renderBienvenida() {
         <Route path="/seleccionar-turno" element={<p>pantalla seleccionar turno</p>} />
         <Route path="/confirmacion" element={<p>pantalla confirmacion</p>} />
         <Route path="/token" element={<p>pantalla token</p>} />
+        <Route path="/registrar-paciente" element={<p>pantalla registrar paciente</p>} />
         <Route path="/error" element={<p>pantalla error</p>} />
       </Routes>
     </MemoryRouter>,
@@ -170,20 +171,16 @@ describe('Bienvenida', () => {
     expect(useTotemStore.getState().confirmacion).toBeNull();
   });
 
-  it('registra el llamado sin paciente y deriva con su numero cuando el DNI no existe', async () => {
-    const fetchMock = mockFetch(
-      respuestaJson(200, { Tipo: 'derivado', Paciente: null, Turnos: null }),
-      respuestaJson(200, { Numero: 7 }),
-    );
+  it('pide el nombre sin registrar el llamado cuando el DNI no existe', async () => {
+    const fetchMock = mockFetch(respuestaJson(200, { Tipo: 'derivado', Paciente: null, Turnos: null }));
     renderBienvenida();
 
     ingresarDni('11111111');
 
-    expect(await screen.findByText('pantalla confirmacion')).toBeInTheDocument();
-    const [urlLlamado, initLlamado] = fetchMock.mock.calls[1];
-    expect(urlLlamado).toBe(`${API_BASE_URL}/api/atencion/llamado`);
-    expect(JSON.parse(initLlamado.body)).toEqual({ Sucursal: 16, Dni: '11111111', PacienteCodigo: null, TotemRecepcionId: 3 });
-    expect(useTotemStore.getState().confirmacion).toEqual({ tipo: 'derivado', numero: 7, paciente: undefined });
+    expect(await screen.findByText('pantalla registrar paciente')).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(useTotemStore.getState().dni).toBe('11111111');
+    expect(useTotemStore.getState().confirmacion).toBeNull();
   });
 
   it('registra el llamado con el codigo del paciente cuando no tiene turnos hoy', async () => {
@@ -200,14 +197,14 @@ describe('Bienvenida', () => {
     expect(useTotemStore.getState().confirmacion).toMatchObject({ tipo: 'derivado', numero: 8, paciente: { codigo: 501 } });
   });
 
-  it('muestra la pantalla de error cuando no se pudo registrar el llamado de un DNI sin turnos', async () => {
+  it('muestra la pantalla de error cuando no se pudo registrar el llamado de un paciente sin turnos', async () => {
     mockFetch(
-      respuestaJson(200, { Tipo: 'derivado', Paciente: null, Turnos: null }),
+      respuestaJson(200, { Tipo: 'derivado', Paciente: PACIENTE_DTO, Turnos: null }),
       respuestaJson(500, { Message: 'error' }),
     );
     renderBienvenida();
 
-    ingresarDni('11111111');
+    ingresarDni('30738807');
 
     expect(await screen.findByText('pantalla error')).toBeInTheDocument();
     expect(useTotemStore.getState().confirmacion).toBeNull();

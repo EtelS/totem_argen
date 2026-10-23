@@ -2,6 +2,8 @@ interface TecladoAlfanumericoProps {
   valor: string;
   onCambiar: (valor: string) => void;
   maxLength?: number;
+  /** Adds a space key, for free text such as a name. */
+  conEspacio?: boolean;
 }
 
 const FILAS = [
@@ -11,7 +13,7 @@ const FILAS = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
 ];
 
-export function TecladoAlfanumerico({ valor, onCambiar, maxLength = 32 }: TecladoAlfanumericoProps) {
+export function TecladoAlfanumerico({ valor, onCambiar, maxLength = 32, conEspacio = false }: TecladoAlfanumericoProps) {
   function presionar(tecla: string) {
     if (valor.length >= maxLength) {
       return;
@@ -53,6 +55,16 @@ export function TecladoAlfanumerico({ valor, onCambiar, maxLength = 32 }: Teclad
         >
           C
         </button>
+        {conEspacio && (
+          <button
+            type="button"
+            onClick={() => presionar(' ')}
+            className="flex-[3] rounded-xl bg-totem-key py-4 text-xl font-semibold text-totem-navy shadow hover:bg-totem-accent hover:text-white focus-visible:outline focus-visible:outline-4 focus-visible:outline-totem-accent"
+            aria-label="Espacio"
+          >
+            espacio
+          </button>
+        )}
         <button
           type="button"
           onClick={borrar}

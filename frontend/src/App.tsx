@@ -13,6 +13,7 @@ import { Login } from './pages/Login';
 import { SeleccionarSucursal } from './pages/SeleccionarSucursal';
 import { SeleccionarTotem } from './pages/SeleccionarTotem';
 import { SeleccionarTurno } from './pages/SeleccionarTurno';
+import { RegistrarPaciente } from './pages/RegistrarPaciente';
 
 export default function App() {
   useEffect(() => {
@@ -70,6 +71,16 @@ export default function App() {
           <LayoutKiosco>
             <RequireSesion>
               <SeleccionarTurno />
+            </RequireSesion>
+          </LayoutKiosco>
+        }
+      />
+      <Route
+        path="/registrar-paciente"
+        element={
+          <LayoutKiosco>
+            <RequireSesion>
+              <RegistrarPaciente />
             </RequireSesion>
           </LayoutKiosco>
         }
