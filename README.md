@@ -102,7 +102,7 @@ mantiene logueado mientras se use dentro de los 30 dias de vigencia.
      imprimir el ticket.
 4. Si la mutual del turno no tiene autogestion, el paciente no tiene turno para el dia de hoy, o no se
    encuentra, se registra el llamado en Recepcion (`spTotemInsertarLlamado`,
-   con `PacienteId` NULL si el DNI no existe) y se lo deriva a Recepcion con
+   con `PacienteId` NULL y el DNI en `Observacion` si el DNI no existe) y se lo deriva a Recepcion con
    ese numero (`/confirmacion`). Si el DNI pertenece a un
    paciente conocido (aunque sea particular o sin turno hoy), se muestra su
    nombre en la pantalla de derivacion.
