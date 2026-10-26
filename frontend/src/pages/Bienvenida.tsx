@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TecladoNumerico } from '../components/TecladoNumerico';
-import { BotonAyuda } from '../components/BotonAyuda';
 import { useTotemStore } from '../store/useTotemStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { ApiError } from '../api/client';
@@ -107,7 +106,6 @@ export function Bienvenida() {
         Continuar
       </button>
 
-      <BotonAyuda />
     </div>
   );
 }

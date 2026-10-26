@@ -68,7 +68,7 @@ describe('Bienvenida', () => {
     expect(screen.getByText('Bienvenido/a')).toBeInTheDocument();
     expect(screen.getByText('Ingresa tu numero de DNI')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continuar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Necesito ayuda' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Necesito ayuda' })).not.toBeInTheDocument();
   });
 
   it('confirma directo en el backend cuando el paciente tiene un solo turno hoy con mutual', async () => {
